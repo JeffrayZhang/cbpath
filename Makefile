@@ -1,4 +1,17 @@
 
+# runs DB migrations and creates one if needed
+migrate:
+	cd backend && yarn prisma migrate dev
+
+# resets the DB by deleting everything inside of it
+# once you run this, you'll need to do `make migrate` again
+reset:
+	cd backend && yarn prisma migrate reset
+
+# formats the backend/schema/prisma.schema file
+format:
+	cd backend && yarn prisma format
+
 
 setup:
 	@echo "running install script... if something fails, fix it and try again\n\n\n"
@@ -9,4 +22,4 @@ setup:
 	cd frontend && yarn
 	@echo "You're all set up, open two terminals:\n    In the first one run: cd frontend && yarn start\n    In the second one run: cd backend && yarn start\nHappy coding!"
 
-.PHONY: setup
+.PHONY: migrate reset format setup
