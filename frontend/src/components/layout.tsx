@@ -1,6 +1,13 @@
 import { FC, ReactNode, useEffect, useMemo, useState } from "react";
 import { Button, Layout, Menu, theme, Image, Input, Drawer } from "antd";
-import { googleAuthProvider, signIn, useCurrentUser } from "../lib/firebase";
+import {
+  googleAuthProvider,
+  signIn,
+  useCurrentUser,
+  signOut,
+  deleteUser,
+  authenticatedApiRequest,
+} from "../lib/firebase";
 import { LeftOutlined } from "@ant-design/icons";
 import {
   RouterProvider,
@@ -36,11 +43,6 @@ export const PageLayout = ({
   const onClose = () => {
     setOpen(false);
   };
-
-  function deleteAccount() {
-    //TODO! Replace with firebase delete account function
-    window.location.replace(`/`);
-  }
 
   return (
     <Layout>
@@ -100,7 +102,7 @@ export const PageLayout = ({
                   <Menu.Item
                     style={{ fontWeight: "bold", fontSize: "20px" }}
                     key="sign-out"
-                    onClick={() => window.location.replace("/")} //TODO: Replace with the firebase sign out function
+                    onClick={() => signOut()}
                   >
                     Sign Out
                   </Menu.Item>
@@ -113,7 +115,10 @@ export const PageLayout = ({
                         "By deleting your account under " +
                           currentUser.email +
                           ", all data, including your course reviews, will be deleted as well. \n \n This action cannot be undone.",
-                        deleteAccount,
+                        () => {
+                          authenticatedApiRequest("DELETE", "/user/delete");
+                          deleteUser();
+                        },
                       )
                     }
                   >

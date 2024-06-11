@@ -8,6 +8,23 @@ const express_1 = __importDefault(require("express"));
 const db_1 = require("./db");
 const middleware_1 = require("./middleware");
 exports.userRouter = express_1.default.Router();
+exports.userRouter.delete("/delete", middleware_1.requireAuth, async (req, res) => {
+    const { uid } = req.token;
+    const user = await db_1.prisma.user.findUnique({
+        where: { firebase_uid: uid },
+    });
+    await db_1.prisma.reviews.deleteMany({
+        where: {
+            user_id: user.id,
+        },
+    });
+    await db_1.prisma.user.delete({
+        where: {
+            id: user.id,
+        },
+    });
+    res.status(200).send("success");
+});
 // get all users
 exports.userRouter.get("/", async (req, res) => {
     const users = await db_1.prisma.user.findMany();

@@ -1,6 +1,7 @@
 import { Form, Input, Button, message, Checkbox, Rate, Segmented } from "antd";
 import { authenticatedApiRequest, useCurrentUser } from "../lib/firebase";
 import { useState } from "react";
+import { time } from "console";
 
 interface Review {
   course_code: string;
@@ -45,7 +46,10 @@ export const CourseReviewForm = ({
           );
         }
         console.log("Review submitted successfully:", response.data);
-        message.success("Review submitted successfully");
+        message.success(
+          "Review submitted successfully! Reloading page data now!",
+        );
+        setTimeout(() => window.location.reload(), 2000);
       }
     } catch (error) {
       console.error("Error submitting review:", error || error);
@@ -86,7 +90,7 @@ export const CourseReviewForm = ({
             content: myReviewData?.content,
             difficulty: myReviewData?.difficulty,
             interesting: myReviewData?.interesting,
-            liked: myReviewData?.liked,
+            liked: myReviewData ? myReviewData.liked : true,
             lastUpdated: myReviewData?.lastUpdated,
           },
         }}

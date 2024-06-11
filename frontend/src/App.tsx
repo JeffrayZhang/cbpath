@@ -19,7 +19,7 @@ import {
 } from "react-router-dom";
 import { PageLayout } from "./components/layout";
 import { Profile } from "./Profile";
-import { Input, Button } from "antd";
+import { Input, Button, ConfigProvider } from "antd";
 import { useNavigate } from "react-router-dom";
 import { CoursePage } from "./CoursePage";
 
@@ -101,9 +101,19 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <PageLayout router={router}>
-      <RouterProvider router={router} />
-    </PageLayout>
+    <ConfigProvider
+      theme={{
+        components: {
+          Progress: {
+            circleTextFontSize: "24px",
+          },
+        },
+      }}
+    >
+      <PageLayout router={router}>
+        <RouterProvider router={router} />
+      </PageLayout>
+    </ConfigProvider>
   );
 }
 
