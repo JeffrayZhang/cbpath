@@ -12,6 +12,9 @@ reset:
 format:
 	cd backend && yarn prisma format
 
+# runs frontend and backend in parallel. Press Ctrl+C to exit
+run:
+	cd backend && yarn concurrently -c 'green,cyan' -n 'backend,frontend' 'yarn start' 'cd ../frontend && yarn start'
 
 setup:
 	@echo "running install script... if something fails, fix it and try again\n\n\n"
@@ -22,4 +25,4 @@ setup:
 	cd frontend && yarn
 	@echo "You're all set up, open two terminals:\n    In the first one run: cd frontend && yarn start\n    In the second one run: cd backend && yarn start\nHappy coding!"
 
-.PHONY: migrate reset format setup
+.PHONY: migrate reset format setup run

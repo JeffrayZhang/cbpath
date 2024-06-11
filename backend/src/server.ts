@@ -8,6 +8,19 @@ const port = 8000
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 
+app.use(async (_req, res, next) => {
+  // makes sure that if an error occurs, the server
+  // returns a 500 response rather than crashing the
+  // server
+  try {
+    await next()
+  } catch(error) {
+    console.error(error);
+    console.error(error.stack);
+    res.status(500).send('Something broke :(')
+  }
+})
+
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
