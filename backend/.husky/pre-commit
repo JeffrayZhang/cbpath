@@ -1,5 +1,6 @@
 cd backend
 yarn build
+git add dist
 
 # husky needs to be attached to a package.json, so it will forever live in backend/
 cd ../frontend
