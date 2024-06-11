@@ -8,7 +8,7 @@ const cors_1 = __importDefault(require("cors"));
 const user_router_1 = require("./user-router");
 const app = (0, express_1.default)();
 const port = 8000;
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({ origin: '*' }));
 app.use(express_1.default.json());
 app.get('/', (req, res) => {
     res.send('Hello World!');
