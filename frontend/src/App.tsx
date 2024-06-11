@@ -20,7 +20,6 @@ import CoursePage from "./CoursePage";
 
 /* === REPLACE ME === */
 const { Search } = Input;
-// const SignInPage = () => <div><p>SignIn page!</p><GoogleLoginButton onClick={() => signIn(googleAuthProvider)} /></div>
 function HomePage() {
   const navigate = useNavigate();
   const onSearch = (value: string, _e: any) => navigate(`/course/${value}`);
@@ -61,22 +60,12 @@ function HomePage() {
               paddingRight: "50px",
               margin: "15px",
             }}
-            onClick={() => signIn(googleAuthProvider)}
+            onClick={() => signIn(googleAuthProvider, navigate)}
           >
             Login/Register with Google{" "}
           </Button>
         </div>
-      ) : (
-        <Button
-          type="primary"
-          size="large"
-          style={{ paddingLeft: "50px", paddingRight: "50px", margin: "15px" }}
-          onClick={() => {}}
-        >
-          Leave Course Review{" "}
-        </Button>
-      )}{" "}
-      {/* TODO: add onClick functionality to navigate to a new page where user can leave a review */}
+      ) : null}{" "}
     </div>
   );
 }
@@ -86,10 +75,6 @@ const router = createBrowserRouter([
     path: "/profile",
     element: <Profile />,
   },
-  // {
-  //   path: '/signin',
-  //   element: <SignInPage />,
-  // },
   {
     path: "/",
     element: <HomePage />,

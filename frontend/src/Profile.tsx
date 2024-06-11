@@ -1,7 +1,12 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { API_URL } from "./lib/api";
-import { authenticatedApiRequest, useCurrentUser } from "./lib/firebase";
+import {
+  authenticatedApiRequest,
+  googleAuthProvider,
+  signIn,
+  useCurrentUser,
+} from "./lib/firebase";
 import React from "react";
 import { Button, Checkbox, Form, Input, InputNumber, message } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -20,15 +25,16 @@ function Profile() {
 
   useEffect(() => {
     if (!loggedInUser) {
-      return; //TODO: redirect to login page
+      return;
+    } else {
+      (async function () {
+        const response = await authenticatedApiRequest(
+          "GET",
+          "/user/currentUser",
+        );
+        setCurrentUser(response.data);
+      })();
     }
-    (async function () {
-      const response = await authenticatedApiRequest(
-        "GET",
-        "/user/currentUser",
-      );
-      setCurrentUser(response.data);
-    })();
   }, [loggedInUser]);
 
   const handleSubmit = async (values: any) => {
@@ -44,10 +50,30 @@ function Profile() {
     }
   };
 
-  if (!currentUser) {
-    return null;
-  }
-  return (
+  return !currentUser ? (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <p>You're not signed in! To view your profile, please sign in first. </p>
+      <Button
+        type="primary"
+        size="large"
+        style={{
+          paddingLeft: "50px",
+          paddingRight: "50px",
+          margin: "15px",
+        }}
+        onClick={() => signIn(googleAuthProvider, navigate)}
+      >
+        Login/Register with Google{" "}
+      </Button>
+    </div>
+  ) : (
     <div>
       <h1>Edit Profile Info</h1>
       <Form

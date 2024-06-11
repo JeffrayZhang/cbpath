@@ -29,25 +29,37 @@ googleAuthProvider.addScope("https://www.googleapis.com/auth/userinfo.profile");
 
 type SupportedAuthProvider = GoogleAuthProvider;
 
-export async function signIn(authProvider: SupportedAuthProvider) {
+export async function signIn(
+  authProvider: SupportedAuthProvider,
+  navigate: ((path: string) => void) | null = null,
+) {
   let credentials;
   try {
     credentials = await signInWithPopup(auth, authProvider);
   } catch (error) {
     if (
       error instanceof FirebaseError &&
-      error.code === "auth/cancelled-popup-request"
+      (error.code === "auth/cancelled-popup-request" ||
+        error.code === "auth/popup-closed-by-user")
     ) {
       return;
     }
     alert(
-      "failed to signin with firebase. this might be because of an adblock or popup blocker; please disable it and try again",
+      "Failed to signin with Google Firebase. Please disable all popup blockers and try again.",
     );
     console.error("failed to signInWithPopup", error);
     return;
   }
   const idToken = await credentials.user.getIdToken();
-  await axios.post(`${API_URL}/user`, null, { headers: { idToken } }); //TODO: go into this endpoint and check if they fille in the "name" field. Return that boolean into this function, then navigate to the profile page if they haven't fille in the name field, otherwise, go to home page.
+  const userInfo = await axios.post(`${API_URL}/user`, null, {
+    headers: { idToken },
+  });
+  if (userInfo.data.needsMoreInfo) {
+    const navigateFunc = navigate ?? window.location.replace; // temp workaround
+    navigateFunc("/profile");
+  } else {
+    window.location.reload();
+  }
 }
 
 export function useCurrentUser() {
