@@ -7,7 +7,6 @@ import {
   signOut,
   deleteUser,
   authenticatedApiRequest,
-  useHandleRedirectResult,
 } from "../lib/firebase"
 import { LeftOutlined } from "@ant-design/icons"
 import { RouterProvider, useLocation, type createBrowserRouter } from "react-router-dom"
@@ -18,7 +17,6 @@ const { Header, Content, Footer } = Layout
 type Router = ReturnType<typeof createBrowserRouter>
 
 export const PageLayout = ({ children, router }: { children: ReactNode; router: Router }) => {
-  useHandleRedirectResult()
   const currentUser = useCurrentUser()
   const {
     token: { colorBgContainer, borderRadiusLG },
