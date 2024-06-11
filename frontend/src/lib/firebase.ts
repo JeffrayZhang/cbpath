@@ -46,7 +46,7 @@ export function useCurrentUser() {
   return user
 }
 
-export async function authenticatedApiRequest(method: 'GET' | 'PUT' | 'POST' | 'DELETE', path: string, data?: object, headers?: object) {
+export async function authenticatedApiRequest(method: 'GET' | 'PUT' | 'POST' | 'PATCH' | 'DELETE', path: string, data?: object, headers?: object) {
   if (!auth.currentUser) {
     throw new Error('User is not authenticated')
   }
