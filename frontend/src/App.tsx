@@ -43,7 +43,11 @@ function HomePage() {
     >
       <img src={logo} alt="CB Path Logo" />
       <h2 style={{ textAlign: "center", margin: "20px" }}>
-        Search for any CB Course and see what other students had to say!
+        Search for any course at{" "}
+        <a href="https://colonelbyss.ocdsb.ca/">
+          <u>Colonel By Secondary School</u>{" "}
+        </a>
+        and see what other students had to say!
       </h2>
       <Search
         placeholder="Course Code"
