@@ -70,42 +70,28 @@ export async function signOut() {
   window.location.replace("/")
 }
 
-export function useHandleRedirectResult() {
-  useEffect(() => {
-    ;(async function () {
-      let credentials = null
-      try {
-        credentials = await getRedirectResult(auth)
-      } catch (error) {
-        handleSignInError(error)
-        console.error("failed to getRedirectResult", error)
-      }
-      if (credentials) {
-        await onSignInCredentialsReceived(credentials, null)
-      }
-    })()
-  }, [])
-}
-
 export async function signIn(
   authProvider: SupportedAuthProvider,
   navigate: ((path: string) => void) | null = null
 ) {
   let credentials: UserCredential
-  const md = new MobileDetect(window.navigator.userAgent)
   try {
-    if (md.mobile()) {
-      await signInWithRedirect(auth, authProvider)
-      return // signInWithRedirect stops the program at this point, see useHandleRedirectResult to see where it continues (after redirect)
-    } else {
-      credentials = await signInWithPopup(auth, authProvider)
-    }
+    credentials = await signInWithPopup(auth, authProvider)
   } catch (error) {
     handleSignInError(error)
     console.error("failed to signInWithPopup", error)
     return
   }
-  await onSignInCredentialsReceived(credentials, navigate)
+  if (credentials) {
+    try {
+      await onSignInCredentialsReceived(credentials, navigate)
+    } catch (error) {
+      console.error("failed to onSignInCredentialsReceived", error)
+      alert(
+        "An unexpected error occurred while signing you in, please contact support or try again later"
+      )
+    }
+  }
 }
 
 function handleSignInError(error: unknown) {
@@ -122,19 +108,24 @@ async function onSignInCredentialsReceived(
   credentials: UserCredential,
   navigate: ((path: string) => void) | null
 ) {
-  const idToken = await credentials.user.getIdToken()
-  const userInfo = await axios.post(`${API_URL}/user`, null, {
-    headers: { idToken },
-  })
-  if (
-    userInfo.data.graduationYear === null ||
-    userInfo.data.grade === null ||
-    userInfo.data.isIB === null
-  ) {
-    const navigateFunc = navigate ?? window.location.replace // temp workaround
-    navigateFunc("/profile")
-  } else {
-    window.location.reload()
+  try {
+    const idToken = await credentials.user.getIdToken()
+    const userInfo = await axios.post(`${API_URL}/user`, null, {
+      headers: { idToken },
+    })
+    if (
+      userInfo.data.graduationYear === null ||
+      userInfo.data.grade === null ||
+      userInfo.data.isIB === null
+    ) {
+      const navigateFunc = navigate ?? window.location.replace // temp workaround
+      navigateFunc("/profile")
+    } else {
+      window.location.reload()
+    }
+  } catch (error) {
+    console.error(error)
+    alert("An unexpected error occurred while signing you in, please contact support try again later")
   }
 }
 
