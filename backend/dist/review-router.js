@@ -35,7 +35,22 @@ exports.reviewRouter.get("/:courseID", async (req, res) => {
                 course_code: courseCode,
             },
         });
-        res.json(reviews);
+        const avgReviews = await db_1.prisma.reviews.aggregate({
+            where: {
+                course_code: courseCode,
+            },
+            _avg: {
+                difficulty: true,
+                interesting: true,
+            },
+        });
+        const numLiked = await db_1.prisma.reviews.count({
+            where: {
+                course_code: courseCode,
+                liked: true,
+            },
+        });
+        res.json({ reviews, avgReviews, numLiked });
     }
     catch (error) {
         console.error("Error fetching reviews:", error);
@@ -65,7 +80,7 @@ exports.reviewRouter.get("/:courseID/myreview", middleware_1.requireAuth, async 
     }
 });
 // Get the average reviews of a course
-exports.reviewRouter.get("/average/:courseID", async (req, res) => {
+exports.reviewRouter.get("/:courseID/avgreviews", async (req, res) => {
     const { courseID: courseCode } = req.params;
     try {
         const avgReviews = await db_1.prisma.reviews.aggregate({
@@ -77,7 +92,13 @@ exports.reviewRouter.get("/average/:courseID", async (req, res) => {
                 interesting: true,
             },
         });
-        res.json(avgReviews);
+        const numLiked = await db_1.prisma.reviews.count({
+            where: {
+                course_code: courseCode,
+                liked: true,
+            },
+        });
+        res.json({ avgReviews, numLiked });
     }
     catch (error) {
         console.error("Error fetching average reviews:", error);

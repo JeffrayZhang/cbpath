@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Form,
   Input,
@@ -15,9 +15,13 @@ import {
   Flex,
   Rate,
   Tag,
+  InputRef,
+  TableColumnsType,
+  TableColumnType,
+  Space,
 } from "antd";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   authenticatedApiRequest,
   signIn,
@@ -28,7 +32,24 @@ import { API_URL } from "./lib/api";
 import { ErrorCourseNotFound } from "./components/error-course-not-found";
 import { CourseReviewForm } from "./components/course-review-form";
 import Search from "antd/lib/input/Search";
+import { SearchOutlined } from "@ant-design/icons";
+import { FilterDropdownProps } from "antd/es/table/interface";
 
+const difficultyTooltips = [
+  "Very Hard",
+  "Hard",
+  "Manageable",
+  "Easy",
+  "Very Easy",
+];
+
+const interestingTooltips = [
+  "Very Boring",
+  "Boring",
+  "Neutral",
+  "Interesting",
+  "Very Interesting",
+];
 interface Review {
   id: number;
   course_code: string;
@@ -40,11 +61,20 @@ interface Review {
   lastUpdated: Date;
 }
 
+function convertToLocalTime(utcTime: string) {
+  return new Date(utcTime).toLocaleString();
+}
+interface AllCourseReviews {
+  reviews: Review[];
+  avgReviews: { _avg: { difficulty: number; interesting: number } };
+  numLiked: number;
+}
+
 type CourseData = {
   code: string;
   title: string;
   description?: string;
-  prerequesites: string;
+  prerequesites: string[];
   is_ib_course: boolean;
   elective: boolean;
 };
@@ -57,18 +87,35 @@ type TablePaginationPosition = NonNullable<
   TablePagination<any>["position"]
 >[number];
 
-{
-  /*TODO: Read docs to figure out how to have the table populate, sort default from most recent to least recent, allow sorting on all rating columns, and have search work at the top, and pagination
-https://ant.design/components/table*/
-}
+type DataIndex = keyof Review;
+
+const CourseList = (props: { courses?: string[] }) => {
+  if (!props.courses || props.courses.length === 0) {
+    return <ul>None 😊</ul>;
+  } else {
+    return (
+      <ul>
+        {props.courses.map((course) => (
+          <li key={course}>
+            <a href={`/course/${course}`}>{course}</a>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+};
 
 export function CoursePage() {
   const { courseID } = useParams();
   const currentUser = useCurrentUser();
   const [courseData, setCourseData] = useState<CourseData>();
+  const [leadsToData, setLeadsToData] = useState<string[]>();
   const [myReviewData, setMyReviewData] = useState<Review>();
-  const [top, setTop] = useState<TablePaginationPosition>("topLeft");
+  const [allCourseReviews, setAllCourseReviews] = useState<AllCourseReviews>();
   const [bottom, setBottom] = useState<TablePaginationPosition>("bottomRight");
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const searchInput = useRef<InputRef>(null);
   const navigate = useNavigate();
 
   const [openMyReview, setOpenMyReview] = useState(false);
@@ -80,50 +127,6 @@ export function CoursePage() {
   const onCloseMyReview = () => {
     setOpenMyReview(false);
   };
-
-  let dataSourceAllReviews: any = []; //TODO: Fetch actual reviews
-  let columnsAllReviews = [
-    { title: "Title", dataIndex: "0", key: "title" },
-    {
-      title: "Content",
-      dataIndex: "1",
-      key: "content",
-    },
-    {
-      title: "Easy",
-      dataIndex: "2",
-      key: "difficulty",
-    },
-    {
-      title: "Interesting",
-      dataIndex: "3",
-      key: "interesting",
-    },
-    {
-      title: "Liked",
-      dataIndex: "4",
-      key: "liked",
-    },
-    {
-      title: "Last Updated",
-      dataIndex: "4",
-      key: "last-updated",
-    },
-  ];
-
-  const items: CollapseProps["items"] = [
-    //TODO: Fetch actual pre reqs & leads to
-    {
-      key: "1",
-      label: "Prerequisites:",
-      children: <p>"to replace"</p>,
-    },
-    {
-      key: "2",
-      label: "Leads to the below courses:",
-      children: <p>"to replace"</p>,
-    },
-  ];
 
   useEffect(() => {
     // when component mounts, check if courseCode exists
@@ -138,17 +141,199 @@ export function CoursePage() {
         }
         const response = await axios.get(`${API_URL}/course/${courseID}`);
         setCourseData(response.data);
+        const leadsToResponse = await axios.get(
+          `${API_URL}/course/${courseID}/leadsTo`,
+        );
+        setLeadsToData(leadsToResponse.data);
+        const allReviewsResponse = await axios.get(
+          `${API_URL}/review/${courseID}`,
+        );
+        setAllCourseReviews(allReviewsResponse.data);
       } catch (error) {
         setCourseData(undefined);
         setMyReviewData(undefined);
+        setLeadsToData(undefined);
+        setAllCourseReviews(undefined);
       }
     })();
-  }, [setCourseData, setMyReviewData, currentUser]);
+  }, [
+    setCourseData,
+    setMyReviewData,
+    currentUser,
+    setLeadsToData,
+    setAllCourseReviews,
+  ]);
 
   console.log(myReviewData);
   if (!courseData) {
     return <ErrorCourseNotFound />;
   } else {
+    const items: CollapseProps["items"] = [
+      {
+        key: "1",
+        label: "Prerequisites:",
+        children: <CourseList courses={courseData.prerequesites} />,
+      },
+      {
+        key: "2",
+        label: "Leads to the below courses:",
+        children: <CourseList courses={leadsToData} />,
+      },
+    ];
+    let dataSourceAllReviews: any[] = [];
+    let columnsAllReviews: any[] = [];
+
+    const handleSearch = (
+      selectedKeys: string[],
+      confirm: FilterDropdownProps["confirm"],
+      dataIndex: DataIndex,
+    ) => {
+      confirm();
+      setSearchText(selectedKeys[0]);
+      setSearchedColumn(dataIndex);
+    };
+
+    const handleReset = (clearFilters: () => void) => {
+      clearFilters();
+      setSearchText("");
+    };
+
+    const getColumnSearchProps = (
+      dataIndex: DataIndex,
+    ): TableColumnType<Review> => ({
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+        close,
+      }) => (
+        <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+          <Input
+            ref={searchInput}
+            placeholder={`Search ${dataIndex}`}
+            value={selectedKeys[0]}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() =>
+              handleSearch(selectedKeys as string[], confirm, dataIndex)
+            }
+            style={{ marginBottom: 8, display: "block" }}
+          />
+          <Space>
+            <Button
+              type="primary"
+              onClick={() =>
+                handleSearch(selectedKeys as string[], confirm, dataIndex)
+              }
+              icon={<SearchOutlined />}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Search
+            </Button>
+            <Button
+              onClick={() => clearFilters && handleReset(clearFilters)}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Reset
+            </Button>
+            <Button
+              type="link"
+              size="small"
+              onClick={() => {
+                confirm({ closeDropdown: false });
+                setSearchText((selectedKeys as string[])[0]);
+                setSearchedColumn(dataIndex);
+              }}
+            >
+              Filter
+            </Button>
+            <Button
+              type="link"
+              size="small"
+              onClick={() => {
+                close();
+              }}
+            >
+              close
+            </Button>
+          </Space>
+        </div>
+      ),
+      filterIcon: (filtered: boolean) => (
+        <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+      ),
+      onFilter: (value, record) =>
+        record[dataIndex]!.toString()
+          .toLowerCase()
+          .includes((value as string).toLowerCase()),
+      onFilterDropdownOpenChange: (visible) => {
+        if (visible) {
+          setTimeout(() => searchInput.current?.select(), 100);
+        }
+      },
+    });
+
+    if (allCourseReviews) {
+      dataSourceAllReviews = allCourseReviews.reviews.map((r) => ({
+        ...r,
+        key: r.id,
+      }));
+      columnsAllReviews = [
+        {
+          title: "Title",
+          dataIndex: "title",
+          key: "title",
+          ...getColumnSearchProps("title"),
+        },
+        {
+          title: "Content",
+          dataIndex: "content",
+          key: "content",
+          ...getColumnSearchProps("content"),
+        },
+        {
+          title: "Easy (out of 5)",
+          dataIndex: "difficulty",
+          key: "difficulty",
+          sorter: (a: Review, b: Review) => a.difficulty - b.difficulty,
+          render: (difficulty: number) =>
+            difficulty + ": " + difficultyTooltips[difficulty - 1],
+        },
+        {
+          title: "Interesting (out of 5)",
+          dataIndex: "interesting",
+          key: "interesting",
+          sorter: (a: Review, b: Review) => a.difficulty - b.difficulty,
+          render: (interesting: number) =>
+            interesting + ": " + interestingTooltips[interesting - 1],
+        },
+        {
+          title: "Liked?",
+          dataIndex: "liked",
+          key: "liked",
+          render: (liked: boolean) => (liked ? "Yes" : "No"),
+          filters: [
+            { text: "Yes", value: true },
+            { text: "No", value: false },
+          ],
+          onFilter: (value: any, record: Review) => record.liked === value,
+        },
+        {
+          title: "Last Updated",
+          dataIndex: "lastUpdated",
+          key: "lastUpdated",
+          render: (lastUpdated: string) => convertToLocalTime(lastUpdated),
+          defaultSortOrder: "descend",
+          sorter: (a: Review, b: Review) =>
+            new Date(a.lastUpdated).getDate() -
+            new Date(b.lastUpdated).getDate(),
+        },
+      ];
+    }
     return (
       <div
         style={{
@@ -279,51 +464,86 @@ export function CoursePage() {
         />
 
         <hr className="solid"></hr>
-
-        <h2 style={{ marginBottom: "20px" }}>Average Course Reviews</h2>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            marginBottom: "20px",
-            alignItems: "center",
-          }}
-        >
-          {/* TODO: Fetch actual data*/}
-          <Progress
-            type="circle"
-            percent={50}
-            format={(percent) => `${percent}% liked`}
-            size={[150, 150]}
-          />
-          <div style={{ padding: "25px 50px" }}>
-            <div style={{ marginBottom: "30px" }}>
-              <h2 style={{ fontSize: "20px" }}>Difficulty: "Manageable"</h2>
-              <Rate />
+        {!allCourseReviews || allCourseReviews.reviews.length === 0 ? (
+          <h2 style={{ marginBottom: "20px" }}>
+            {" "}
+            No reviews yet! Be the first one!{" "}
+          </h2>
+        ) : (
+          <div>
+            <h2 style={{ marginBottom: "20px" }}>Average Course Reviews</h2>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                marginBottom: "20px",
+                alignItems: "center",
+              }}
+            >
+              <Progress
+                type="circle"
+                percent={Math.round(
+                  (allCourseReviews.numLiked /
+                    allCourseReviews.reviews.length) *
+                    100,
+                )}
+                format={(percent) => `${percent}% liked`}
+                size={200}
+              />
+              <div style={{ padding: "25px 50px" }}>
+                <div style={{ marginBottom: "30px" }}>
+                  <h2 style={{ fontSize: "20px" }}>
+                    Difficulty? "
+                    {
+                      difficultyTooltips[
+                        Math.round(
+                          allCourseReviews.avgReviews._avg.difficulty,
+                        ) - 1
+                      ]
+                    }
+                    "
+                  </h2>
+                  <Rate
+                    style={{ color: "#F9A602" }}
+                    disabled
+                    value={Math.round(
+                      allCourseReviews.avgReviews._avg.difficulty,
+                    )}
+                  />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: "20px" }}>
+                    Interesting? "
+                    {
+                      difficultyTooltips[
+                        Math.round(
+                          allCourseReviews.avgReviews._avg.interesting,
+                        ) - 1
+                      ]
+                    }
+                    "
+                  </h2>
+                  <Rate
+                    style={{ color: "#F9A602" }}
+                    disabled
+                    value={Math.round(
+                      allCourseReviews.avgReviews._avg.interesting,
+                    )}
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <h2 style={{ fontSize: "20px" }}>Interesting: "Neutral"</h2>
-              <Rate />
-            </div>
+            <h2>All Reviews</h2>
+            {allCourseReviews && (
+              <Table
+                dataSource={dataSourceAllReviews}
+                columns={columnsAllReviews}
+                style={{ padding: "20px 0px" }}
+                pagination={{ position: [bottom] }}
+              />
+            )}
           </div>
-        </div>
-
-        <h2>All Reviews</h2>
-        {/* TODO: Make search bar work */}
-        <Search
-          placeholder="Search for reviews by keyword"
-          allowClear
-          enterButton="Search"
-          size="large"
-          onSearch={() => {}}
-          style={{ paddingTop: "20px" }}
-        />
-        <Table
-          dataSource={dataSourceAllReviews}
-          columns={columnsAllReviews}
-          style={{ padding: "20px 0px" }}
-          pagination={{ position: [top, bottom] }}
-        />
+        )}
       </div>
     );
   }
