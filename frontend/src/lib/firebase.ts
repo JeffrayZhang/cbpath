@@ -1,17 +1,20 @@
-import axios from "axios";
-import { FirebaseError, initializeApp } from "firebase/app";
+import axios from "axios"
+import { FirebaseError, initializeApp } from "firebase/app"
 import {
   GoogleAuthProvider,
   User,
+  UserCredential,
   getAuth,
+  getRedirectResult,
   reauthenticateWithPopup,
   reauthenticateWithRedirect,
   signInWithPopup,
   signInWithRedirect,
-} from "firebase/auth";
-import { useEffect, useState } from "react";
-import { API_URL } from "./api";
-import MobileDetect from "mobile-detect";
+} from "firebase/auth"
+import { useEffect, useState } from "react"
+import { API_URL } from "./api"
+import MobileDetect from "mobile-detect"
+import { useNavigate } from "react-router-dom"
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -21,120 +24,138 @@ const firebaseConfig = {
   storageBucket: "jeff-app-4533e.appspot.com",
   messagingSenderId: "634267512629",
   appId: "1:634267512629:web:af81dc89cf38497a4de67c",
-};
+}
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const googleAuthProvider = new GoogleAuthProvider();
+const app = initializeApp(firebaseConfig)
+export const auth = getAuth(app)
+export const googleAuthProvider = new GoogleAuthProvider()
 
 // allows access to user's displayName
-googleAuthProvider.addScope("https://www.googleapis.com/auth/userinfo.profile");
+googleAuthProvider.addScope("https://www.googleapis.com/auth/userinfo.profile")
 
-type SupportedAuthProvider = GoogleAuthProvider;
+type SupportedAuthProvider = GoogleAuthProvider
 
 export async function deleteUser() {
-  const md = new MobileDetect(window.navigator.userAgent);
+  const md = new MobileDetect(window.navigator.userAgent)
   if (!auth.currentUser) {
-    throw new Error("User is not authenticated");
+    throw new Error("User is not authenticated")
   }
-  let tries = 0;
+  let tries = 0
   while (true) {
     try {
-      await auth.currentUser.delete();
-      window.location.replace("/");
-      return;
+      await auth.currentUser.delete()
+      window.location.replace("/")
+      return
     } catch (error) {
-      if (
-        error instanceof FirebaseError &&
-        error.code === "auth/requires-recent-login"
-      ) {
+      if (error instanceof FirebaseError && error.code === "auth/requires-recent-login") {
         if (md.mobile()) {
-          await reauthenticateWithRedirect(
-            auth.currentUser,
-            googleAuthProvider,
-          );
+          await reauthenticateWithRedirect(auth.currentUser, googleAuthProvider)
         } else {
-          await reauthenticateWithPopup(auth.currentUser, googleAuthProvider);
+          await reauthenticateWithPopup(auth.currentUser, googleAuthProvider)
         }
-        tries++;
+        tries++
       }
       if (tries > 1) {
-        alert(
-          "Failed to delete user firebase account. Please disable all popup blockers and try again.",
-        );
-        console.error("failed to delete user firebase account", error);
-        return;
+        alert("Failed to delete user firebase account. Please disable all popup blockers and try again.")
+        console.error("failed to delete user firebase account", error)
+        return
       }
     }
   }
 }
 
 export async function signOut() {
-  await auth.signOut();
-  window.location.replace("/");
+  await auth.signOut()
+  window.location.replace("/")
+}
+
+export function useHandleRedirectResult() {
+  useEffect(() => {
+    ;(async function () {
+      let credentials = null
+      try {
+        credentials = await getRedirectResult(auth)
+      } catch (error) {
+        handleSignInError(error)
+        console.error("failed to getRedirectResult", error)
+      }
+      if (credentials) {
+        await onSignInCredentialsReceived(credentials, null)
+      }
+    })()
+  }, [])
 }
 
 export async function signIn(
   authProvider: SupportedAuthProvider,
-  navigate: ((path: string) => void) | null = null,
+  navigate: ((path: string) => void) | null = null
 ) {
-  let credentials;
-  const md = new MobileDetect(window.navigator.userAgent);
+  let credentials: UserCredential
+  const md = new MobileDetect(window.navigator.userAgent)
   try {
     if (md.mobile()) {
-      credentials = await signInWithRedirect(auth, authProvider);
+      await signInWithRedirect(auth, authProvider)
+      return // signInWithRedirect stops the program at this point, see useHandleRedirectResult to see where it continues (after redirect)
     } else {
-      credentials = await signInWithPopup(auth, authProvider);
+      credentials = await signInWithPopup(auth, authProvider)
     }
   } catch (error) {
-    if (
-      error instanceof FirebaseError &&
-      (error.code === "auth/cancelled-popup-request" ||
-        error.code === "auth/popup-closed-by-user")
-    ) {
-      return;
-    }
-    alert(
-      "Failed to signin with Google Firebase. Please disable all popup blockers and try again.",
-    );
-    console.error("failed to signInWithPopup", error);
-    return;
+    handleSignInError(error)
+    console.error("failed to signInWithPopup", error)
+    return
   }
-  const idToken = await credentials.user.getIdToken();
+  await onSignInCredentialsReceived(credentials, navigate)
+}
+
+function handleSignInError(error: unknown) {
+  if (
+    error instanceof FirebaseError &&
+    (error.code === "auth/cancelled-popup-request" || error.code === "auth/popup-closed-by-user")
+  ) {
+    return
+  }
+  alert("Failed to signin with Google Firebase. Please disable all popup blockers and try again.")
+}
+
+async function onSignInCredentialsReceived(
+  credentials: UserCredential,
+  navigate: ((path: string) => void) | null
+) {
+  const idToken = await credentials.user.getIdToken()
   const userInfo = await axios.post(`${API_URL}/user`, null, {
     headers: { idToken },
-  });
+  })
   if (
     userInfo.data.graduationYear === null ||
     userInfo.data.grade === null ||
     userInfo.data.isIB === null
   ) {
-    const navigateFunc = navigate ?? window.location.replace; // temp workaround
-    navigateFunc("/profile");
+    const navigateFunc = navigate ?? window.location.replace // temp workaround
+    navigateFunc("/profile")
   } else {
-    window.location.reload();
+    window.location.reload()
   }
 }
 
 export function useCurrentUser() {
-  const [user, setUser] = useState<User | null>();
+  const [user, setUser] = useState<User | null>()
   useEffect(() => {
     auth.onAuthStateChanged(() => {
-      setUser(auth.currentUser);
-    });
-  }, []);
-  return user;
+      setUser(auth.currentUser)
+    })
+  }, [])
+  return user
 }
 
 export async function authenticatedApiRequest(
   method: "GET" | "PUT" | "POST" | "PATCH" | "DELETE",
   path: string,
   data?: object,
-  headers?: object,
+  headers?: object
 ) {
   if (!auth.currentUser) {
-    throw new Error("User is not authenticated");
+    throw new Error("User is not authenticated")
   }
   return await axios(`${API_URL}${path}`, {
     method,
@@ -143,5 +164,5 @@ export async function authenticatedApiRequest(
       idToken: await auth.currentUser.getIdToken(),
       ...(headers ?? {}),
     },
-  });
+  })
 }
