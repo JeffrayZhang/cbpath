@@ -1,7 +1,13 @@
+# format files
+FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g')
+echo "$FILES" | xargs ./backend/node_modules/.bin/prettier --ignore-unknown --write
+echo "$FILES" | xargs git add
+
+# husky needs to be attached to a package.json, so it will forever live in backend/
 cd backend
+
 yarn build
 git add dist
 
-# husky needs to be attached to a package.json, so it will forever live in backend/
 cd ../frontend
 yarn test

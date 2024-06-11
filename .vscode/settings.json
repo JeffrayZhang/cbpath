@@ -1,12 +1,12 @@
 {
-    "files.autoSave": "onFocusChange",
-    "editor.formatOnSave": true,
-    "editor.formatOnSaveMode": "file",
-    "typescript.format.enable": true,
-    "[typescriptreact]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[typescript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+  "files.autoSave": "onWindowChange",
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "typescript.format.enable": true,
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
