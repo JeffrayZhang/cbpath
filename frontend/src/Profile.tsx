@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { API_URL } from "./lib/api";
 import { authenticatedApiRequest, useCurrentUser } from "./lib/firebase";
 import React from 'react';
-import { Button, Form, Input, InputNumber } from 'antd';
+import { Button, Checkbox, Form, Input, InputNumber } from 'antd';
 
 type CurrentUser = {email:string, name?:string,grade?:string,graduationYear?:number,isIb?:boolean}
 function Profile() {
@@ -22,7 +22,7 @@ function Profile() {
 
   const handleSubmit = async (values: any) => {
     try {
-      await authenticatedApiRequest("POST", "/user", values.user);
+      await authenticatedApiRequest("PUT", "/user", values.user);
       // Optionally, you can update the state to reflect the changes
       // setCurrentUser(values.user);
     } catch (error) {
@@ -33,7 +33,6 @@ function Profile() {
   if (!currentUser) {
     return null;
   }
-
   return (
     <Form
       layout="vertical"
@@ -49,11 +48,11 @@ function Profile() {
       <Form.Item name={['user', 'grade']} label="Grade" rules={[{ type: 'number', min: 9, max: 12 }]}>
         <InputNumber />
       </Form.Item>
-      <Form.Item name={['user', 'website']} label="Website">
-        <Input />
+      <Form.Item name={['user', 'graduationYear']} label="Graduation Year" rules={[{ type: 'number', min: 1976}]}>
+        <InputNumber/>
       </Form.Item>
-      <Form.Item name={['user', 'introduction']} label="Introduction">
-        <Input.TextArea />
+      <Form.Item name={['user', 'isIb']} label="IsIB" valuePropName ="checked">
+        {/* <Checkbox>Enrolled in Ib?</Checkbox> */}
         <Button type="primary" htmlType="submit">
           Submit
         </Button>

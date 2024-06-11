@@ -20,7 +20,7 @@ model User {
   firebase_uid          String                @unique
   student_relationships StudentRelationship[]
   reviews               Reviews[]
-  grade                 String?
+  grade                 Int?
   graduationYear        Int?
   isIb                  Boolean?
 }
