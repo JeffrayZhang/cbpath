@@ -54,7 +54,11 @@ export async function signIn(
   const userInfo = await axios.post(`${API_URL}/user`, null, {
     headers: { idToken },
   });
-  if (userInfo.data.needsMoreInfo) {
+  if (
+    userInfo.data.graduationYear === null ||
+    userInfo.data.grade === null ||
+    userInfo.data.isIB === null
+  ) {
     const navigateFunc = navigate ?? window.location.replace; // temp workaround
     navigateFunc("/profile");
   } else {
