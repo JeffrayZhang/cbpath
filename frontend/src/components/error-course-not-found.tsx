@@ -8,6 +8,7 @@ export const ErrorCourseNotFound = () => {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
+        flex: 1,
       }}
     >
       <img src={noCourseImg} style={{ paddingLeft: "70px" }} alt="error" />

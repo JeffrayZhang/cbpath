@@ -79,6 +79,7 @@
 }
 
 .content-container {
+  display: flex;
   min-height: calc(100vh - 134px);
 }
 
@@ -86,4 +87,9 @@
   .content-container {
     min-height: calc(100vh - 234px);
   }
+}
+
+.menu-item {
+  padding: 10px 0px;
+  font-size: large;
 }

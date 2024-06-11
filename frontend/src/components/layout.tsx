@@ -1,5 +1,5 @@
-import { FC, ReactNode, useEffect, useMemo } from "react";
-import { Button, Layout, Menu, theme, Image, Input } from "antd";
+import { FC, ReactNode, useEffect, useMemo, useState } from "react";
+import { Button, Layout, Menu, theme, Image, Input, Drawer } from "antd";
 import { googleAuthProvider, signIn, useCurrentUser } from "../lib/firebase";
 import { LeftOutlined } from "@ant-design/icons";
 import {
@@ -12,9 +12,6 @@ const { Header, Content, Footer } = Layout;
 
 type Router = ReturnType<typeof createBrowserRouter>;
 
-/**
- * layout component to be used in most (if not all) pages
- */
 export const PageLayout = ({
   children,
   router,
@@ -30,6 +27,14 @@ export const PageLayout = ({
     window.location.replace(`/course/${value}`);
   console.log(window.location.pathname);
   const { Search } = Input;
+
+  const [open, setOpen] = useState(false);
+  const showDrawer = () => {
+    setOpen(true);
+  };
+  const onClose = () => {
+    setOpen(false);
+  };
 
   return (
     <Layout>
@@ -64,14 +69,47 @@ export const PageLayout = ({
               flexDirection: "row",
             }}
           >
-            {" "}
-            <p style={{ color: "white", margin: "15px" }}>Profile</p>{" "}
-            <LeftOutlined style={{ color: "white", fontSize: "24px" }} />{" "}
+            <LeftOutlined
+              style={{ color: "white", fontSize: "24px" }}
+              onClick={showDrawer}
+            />
+            <Drawer placement="right" onClose={onClose} open={open}>
+              <Menu theme="light" mode="inline">
+                <Menu.Item
+                  key="profile"
+                  onClick={() => window.location.replace("/profile")}
+                  style={{ fontWeight: "bold", fontSize: "24px" }}
+                >
+                  Profile
+                </Menu.Item>
+              </Menu>
+              <div
+                style={{ position: "absolute", bottom: "24px", width: "87%" }}
+              >
+                <Menu
+                  theme="light"
+                  mode="inline"
+                  style={{ textAlign: "center" }}
+                >
+                  <Menu.Item
+                    style={{ fontWeight: "bold", fontSize: "20px" }}
+                    key="sign-out"
+                    onClick={() => window.location.replace("/")}
+                  >
+                    Sign Out
+                  </Menu.Item>
+                  <Menu.Item
+                    key="delete"
+                    style={{ color: "red", fontSize: "16px" }}
+                    onClick={() => window.location.replace("/")}
+                  >
+                    Delete Account
+                  </Menu.Item>
+                </Menu>
+              </div>
+            </Drawer>
           </div>
         )}{" "}
-        {/* //TODO: add profile pic icon and on click of the LeftOutlined icon, add
-        a antd "Drawer" component with content menu items "Profile", "My
-        Courses", "My Reviews", "Delete Account", "Sign Out" */}
       </Header>
 
       <Content>
@@ -81,9 +119,6 @@ export const PageLayout = ({
             background: colorBgContainer,
             padding: 24,
             borderRadius: borderRadiusLG,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
           }}
         >
           {children}

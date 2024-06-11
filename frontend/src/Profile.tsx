@@ -57,6 +57,7 @@ function Profile() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        flex: 1,
       }}
     >
       <p>You're not signed in! To view your profile, please sign in first. </p>
@@ -74,7 +75,7 @@ function Profile() {
       </Button>
     </div>
   ) : (
-    <div>
+    <div style={{}}>
       <h1>Edit Profile Info</h1>
       <Form
         layout="vertical"
@@ -126,13 +127,15 @@ function Profile() {
         >
           <Checkbox />
         </Form.Item>
+        <Button type="primary" htmlType="submit">
+          Save
+        </Button>
       </Form>
     </div>
   );
 }
 
-export{Profile}
-
+export { Profile };
 
 // make a new form
 //   course_code String
