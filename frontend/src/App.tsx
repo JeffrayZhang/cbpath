@@ -7,6 +7,7 @@ import { googleAuthProvider, signIn, useCurrentUser } from './lib/firebase';
 import logo from './logo.svg';
 import { CourseForm, CourseTable } from './components/course-components';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { PageLayout } from './components/layout';
 
 /* === REPLACE ME === */
 const ProfilePage = () => (<div>
@@ -39,9 +40,9 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <div className="App">
+    <PageLayout>
       <RouterProvider router={router} />
-    </div>
+    </PageLayout>
   );
 }
 
