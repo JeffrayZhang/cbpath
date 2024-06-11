@@ -38,6 +38,7 @@ function HomePage() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        flex: 1,
       }}
     >
       <img src={logo} alt="CB Path Logo" />
@@ -52,7 +53,6 @@ function HomePage() {
         onSearch={onSearch}
         style={{ width: "80vw" }}
       />
-      {/* <a href="/profile">Go to profile page</a> */}
       {!loggedInUser ? (
         <div
           style={{
