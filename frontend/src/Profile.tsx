@@ -126,12 +126,23 @@ function Profile() {
         >
           <Checkbox />
         </Form.Item>
-        <Button type="primary" htmlType="submit">
-          Save
-        </Button>
       </Form>
     </div>
   );
 }
 
-export { Profile };
+export{Profile}
+
+
+// make a new form
+//   course_code String
+//   title       String?
+//   content     String?
+//   difficulty  Int
+//   interesting Int
+//   liked       Boolean
+// submit        button
+// testing criteria
+// 1. if the course code is wrong, it shouldn't let you submit, add an error in somewhere
+// 2. make sure that if the user already has a review, update the review with the new review with the updated time
+// 3. when you hit submit, make sure that the time is fetched, check table plus that the userid, courseid and stuff is correct

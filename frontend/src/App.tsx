@@ -16,7 +16,7 @@ import { PageLayout } from "./components/layout";
 import { Profile } from "./Profile";
 import { Input, Button } from "antd";
 import { useNavigate } from "react-router-dom";
-import CoursePage from "./CoursePage";
+import {CoursePage} from "./CoursePage";
 
 /* === REPLACE ME === */
 const { Search } = Input;
