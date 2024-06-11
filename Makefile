@@ -11,6 +11,8 @@ reset:
 # formats the backend/schema/prisma.schema file
 format:
 	cd backend && yarn prisma format
+	cd backend && yarn format
+	cd frontend && yarn format
 
 # runs frontend and backend in parallel. Press Ctrl+C to exit
 start:
