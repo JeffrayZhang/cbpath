@@ -11,18 +11,24 @@ import {
 } from "./lib/firebase";
 import logo from "./logo.svg";
 import { CourseForm, CourseTable } from "./components/course-components";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import {
+  BrowserRouter,
+  Router,
+  RouterProvider,
+  createBrowserRouter,
+} from "react-router-dom";
 import { PageLayout } from "./components/layout";
 import { Profile } from "./Profile";
 import { Input, Button } from "antd";
 import { useNavigate } from "react-router-dom";
-import CoursePage from "./CoursePage";
+import { CoursePage } from "./CoursePage";
 
 /* === REPLACE ME === */
 const { Search } = Input;
 function HomePage() {
   const navigate = useNavigate();
-  const onSearch = (value: string, _e: any) => navigate(`/course/${value}`);
+  const onSearch = (value: string, _e: any) =>
+    window.location.replace(`/course/${value}`);
   const loggedInUser = useCurrentUser();
 
   return (
@@ -34,7 +40,7 @@ function HomePage() {
         justifyContent: "center",
       }}
     >
-      <img src={logo} className="App-logo" alt="logo" />
+      <img src={logo} alt="CB Path Logo" />
       <h2 style={{ textAlign: "center", margin: "20px" }}>
         Search for any CB Course and see what other students had to say!
       </h2>
@@ -44,10 +50,18 @@ function HomePage() {
         enterButton="Search"
         size="large"
         onSearch={onSearch}
+        style={{ width: "80vw" }}
       />
       {/* <a href="/profile">Go to profile page</a> */}
       {!loggedInUser ? (
-        <div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <h2 style={{ textAlign: "center", margin: "20px" }}>
             {" "}
             Sign up to leave a course review!{" "}
@@ -87,7 +101,7 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <PageLayout>
+    <PageLayout router={router}>
       <RouterProvider router={router} />
     </PageLayout>
   );

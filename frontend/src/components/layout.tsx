@@ -1,36 +1,55 @@
-import { FC, ReactNode, useMemo } from "react";
-import { Button, Layout, Menu, theme, Image } from "antd";
-import { ItemType, MenuItemType } from "antd/es/menu/hooks/useItems";
+import { FC, ReactNode, useEffect, useMemo } from "react";
+import { Button, Layout, Menu, theme, Image, Input } from "antd";
 import { googleAuthProvider, signIn, useCurrentUser } from "../lib/firebase";
 import { LeftOutlined } from "@ant-design/icons";
-import logo from "../logo.svg";
-import { useNavigate } from "react-router-dom";
+import {
+  RouterProvider,
+  useLocation,
+  type createBrowserRouter,
+} from "react-router-dom";
 
 const { Header, Content, Footer } = Layout;
+
+type Router = ReturnType<typeof createBrowserRouter>;
 
 /**
  * layout component to be used in most (if not all) pages
  */
-export const PageLayout = ({ children }: { children: ReactNode }) => {
+export const PageLayout = ({
+  children,
+  router,
+}: {
+  children: ReactNode;
+  router: Router;
+}) => {
   const currentUser = useCurrentUser();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const onSearch = (value: string, _e: any) =>
+    window.location.replace(`/course/${value}`);
+  console.log(window.location.pathname);
+  const { Search } = Input;
 
   return (
     <Layout>
       <Header style={{ display: "flex", alignItems: "center" }}>
-        <img
-          src={logo}
-          className="App-logo"
-          alt="logo"
-          style={{ position: "absolute", left: "2%", height: "inherit" }}
-        />
+        <div className="logo" onClick={() => window.location.replace("/")} />
+        {window.location.pathname !== "/" ? (
+          <Search
+            placeholder="Course Code"
+            allowClear
+            enterButton="Search"
+            size="large"
+            onSearch={onSearch}
+            style={{ padding: "10px" }}
+          />
+        ) : null}
         {!currentUser ? (
           <Button
             type="primary"
             size="large"
-            style={{ position: "absolute", right: "2%" }}
+            style={{ position: "relative", marginLeft: "auto", right: 0 }}
             onClick={() => signIn(googleAuthProvider)}
           >
             Sign up{" "}
@@ -38,14 +57,15 @@ export const PageLayout = ({ children }: { children: ReactNode }) => {
         ) : (
           <div
             style={{
-              position: "absolute",
-              right: 24,
+              position: "relative",
+              marginLeft: "auto",
+              right: 0,
               display: "flex",
               flexDirection: "row",
             }}
           >
             {" "}
-            <p style={{ color: "white", margin: "15px" }}>Profile Pic</p>{" "}
+            <p style={{ color: "white", margin: "15px" }}>Profile</p>{" "}
             <LeftOutlined style={{ color: "white", fontSize: "24px" }} />{" "}
           </div>
         )}{" "}
@@ -54,13 +74,16 @@ export const PageLayout = ({ children }: { children: ReactNode }) => {
         Courses", "My Reviews", "Delete Account", "Sign Out" */}
       </Header>
 
-      <Content style={{ padding: "0 48px" }}>
+      <Content>
         <div
           className="content-container"
           style={{
             background: colorBgContainer,
             padding: 24,
             borderRadius: borderRadiusLG,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           {children}
@@ -71,7 +94,7 @@ export const PageLayout = ({ children }: { children: ReactNode }) => {
           textAlign: "center",
         }}
       >
-        CB Path ©{new Date().getFullYear()} Created by Jeffray Zhang
+        CB Path ©{new Date().getFullYear()}
       </Footer>
     </Layout>
   );

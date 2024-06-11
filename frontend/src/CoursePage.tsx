@@ -2,26 +2,40 @@ import React, { useState, useEffect } from "react";
 import { Form, Input, InputNumber, Button, message } from "antd";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import { authenticatedApiRequest, useCurrentUser } from "./lib/firebase";
+import { API_URL } from "./lib/api";
+import { ErrorCourseNotFound } from "./components/error-course-not-found";
 
-const CustomForm: React.FC = () => {
+interface Review {
+  course_code: string;
+  title?: string;
+  content?: string;
+  difficulty: number;
+  interesting: number;
+  liked: boolean;
+  lastUpdated: Date;
+}
+
+const ReviewForm: React.FC<{ existingReview?: Review }>= () => {
   const [form] = Form.useForm();
   const { courseID: courseCode } = useParams(); // 2. Use useParams to extract course code
+// Include course code in form values
+    const [formValues, setFormValues] = useState<Review>({
+      course_code: "",
+      title: "",
+      content: "",
+      difficulty: 0,
+      interesting: 0,
+      liked: false,
+      lastUpdated: new Date(),
+    });
 
-  const [formValues, setFormValues] = useState({
-    course_code: "", // Include course code in form values
-    title: "",
-    content: "",
-    difficulty: 0,
-    interesting: 0,
-    liked: false,
-  });
-
-  useEffect(() => {
-    if (courseCode) {
-      setFormValues((prevValues) => ({
-        ...prevValues,
-        course_code: courseCode, // Update course code in form values
-      }));
+    useEffect(() => {
+      if (courseCode) {
+        setFormValues((prevValues) => ({
+          ...prevValues,
+          course_code: courseCode, // Update course code in form values
+        }));
     }
   }, [courseCode]);
 
@@ -32,15 +46,25 @@ const CustomForm: React.FC = () => {
   const handleLikedChange = (liked: boolean) => {
     setFormValues({ ...formValues, liked });
   };
+  
+  const loggedInUser = useCurrentUser(); 
 
   const onFinish = async (values: any) => {
     try {
-      const response = await axios.post("/reviews", values);
-      console.log("Review submitted:", response.data);
-      message.success("Review submitted successfully");
-      form.resetFields();
+      if (!loggedInUser || !loggedInUser) {
+        throw new Error("User not logged in or token not available");
+      } else {
+        const response = await authenticatedApiRequest(
+          "POST",
+          "/review",
+          formValues,
+        );
+        console.log("Review submitted successfully:", response.data);
+        message.success("Review submitted successfully");
+        form.resetFields();
+      }
     } catch (error) {
-      console.error("Error submitting review:", error);
+      console.error("Error submitting review:", error || error);
       message.error("Failed to submit review. Please try again later.");
     }
   };
@@ -103,4 +127,32 @@ const CustomForm: React.FC = () => {
   );
 };
 
-export default CustomForm;
+type CourseData = {
+  code: string;
+  title: string;
+  description?: string;
+  prerequesites: string;
+  is_ib_course: boolean;
+  elective: boolean;
+};
+
+export function CoursePage() {
+  const { courseID } = useParams();
+  const [courseData, setCourseData] = useState<CourseData>();
+  useEffect(() => {
+    // when component mounts, check if courseCode exists
+    (async function () {
+      try {
+        const response = await axios.get(`${API_URL}/course/${courseID}`);
+        setCourseData(response.data);
+      } catch (error) {
+        setCourseData(undefined);
+      }
+    })();
+  }, [setCourseData]);
+  if (!courseData) {
+    return <ErrorCourseNotFound />;
+  } else {
+    return <ReviewForm />;
+  }
+}
