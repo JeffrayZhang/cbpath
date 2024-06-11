@@ -4,10 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "dotenv -e ../.env ts-node-dev src/server.ts",
+    "start": "dotenv -e ../.env nodemon src/server.ts",
     "build": "tsc",
     "start:production": "node dist/server.js",
-    "postinstall": "cd .. && husky backend/.husky",
+    "postinstall": "prisma generate && cd .. && husky backend/.husky",
     "prisma": "dotenv -e ../.env prisma --",
     "prisma:production": "dotenv -e ../.env.prod prisma --"
   },
@@ -15,7 +15,9 @@
     "@prisma/client": "5.10.2",
     "cors": "^2.8.5",
     "dotenv-cli": "^7.3.0",
-    "express": "^4.18.3"
+    "express": "^4.18.3",
+    "firebase-admin": "^12.0.0",
+    "nodemon": "^3.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

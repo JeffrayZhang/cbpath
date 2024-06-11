@@ -1,9 +1,8 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders Create User subtitle', () => {
+test('renders the page without blowing up (smoke-test)', () => {
   render(<App />);
-  const createUserTitle = screen.getByText(/Create User:/i);
-  expect(createUserTitle).toBeInTheDocument();
+  const textOnPage = screen.getByText(/save to reload/i);
+  expect(textOnPage).toBeInTheDocument();
 });
