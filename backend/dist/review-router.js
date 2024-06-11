@@ -13,22 +13,51 @@ exports.reviewRouter.get('/', async (req, res) => {
     const reviews = await db_1.prisma.user.findMany();
     res.json(reviews);
 });
-// create a new review
+// create a new review or update existing review
 exports.reviewRouter.post('/', middleware_1.requireAuth, async (req, res) => {
     const { uid } = req.token;
-    const { title, content, course, difficulty, interesting, liked, lastUpdated } = req.body;
+    const { title, content, course_code, difficulty, interesting, liked, lastUpdated } = req.body;
     const loggedInUser = await db_1.prisma.user.findUnique({ where: { firebase_uid: req.token.uid } });
     if (!title || !content) {
         return res.status(400).json({ error: 'Title and content are needed' });
     }
-    const newReview = await db_1.prisma.reviews.create({
-        data: {
-            title,
-            content, user: { connect: { id: loggedInUser.id } },
-            course: { connect: { code: course } },
-            difficulty, interesting, liked, lastUpdated
+    // Check if the user has already submitted a review for the given course
+    const existingReview = await db_1.prisma.reviews.findFirst({
+        where: {
+            user_id: loggedInUser.id,
+            course_code: course_code
         }
     });
-    res.json(newReview);
+    if (existingReview) {
+        // Update existing review
+        const updatedReview = await db_1.prisma.reviews.update({
+            where: { id: existingReview.id },
+            data: {
+                title,
+                content,
+                difficulty,
+                interesting,
+                liked,
+                lastUpdated
+            }
+        });
+        return res.json(updatedReview);
+    }
+    else {
+        // Create new review
+        const newReview = await db_1.prisma.reviews.create({
+            data: {
+                title,
+                content,
+                user: { connect: { id: loggedInUser.id } },
+                course: { connect: { code: course_code } },
+                difficulty,
+                interesting,
+                liked,
+                lastUpdated
+            }
+        });
+        return res.json(newReview);
+    }
 });
 //# sourceMappingURL=review-router.js.map
