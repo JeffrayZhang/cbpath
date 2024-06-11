@@ -8,7 +8,7 @@
 }
 
 .ant-layout-header {
-  padding: 0% 2%;
+  padding: 0% 1%;
 }
 
 .ant-btn-primary {
@@ -93,3 +93,41 @@
   padding: 10px 0px;
   font-size: large;
 }
+
+h1 {
+  font-size: 52px;
+  margin-block-start: 0em;
+  margin-block-end: 0em;
+}
+
+h2 {
+  font-size: 28px;
+  margin-block-start: 0.3em;
+  margin-block-end: 0.3em;
+}
+
+p.description {
+  font-size: 24px;
+  font-weight: 300;
+  margin-block-start: 20px;
+  margin-block-end: 20px;
+}
+
+p.stats {
+  font-size: 24px;
+  font-weight: 300;
+  margin-block-start: 20px;
+  margin-block-end: 20px;
+}
+
+hr.solid {
+  border-top: 8px solid #aaaa;
+  border-radius: 20px;
+  margin: 10px 0px;
+}
+
+/* div.rounded-side {
+  background-color:#3a3d71;
+  padding:10px;
+  border-radius: 100em 0 0  100em;
+} */

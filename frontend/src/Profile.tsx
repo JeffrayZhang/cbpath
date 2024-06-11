@@ -78,6 +78,7 @@ function Profile() {
     <div style={{}}>
       <h1>Edit Profile Info</h1>
       <Form
+        style={{ marginTop: "20px" }}
         layout="vertical"
         name="nest-messages"
         onFinish={handleSubmit}

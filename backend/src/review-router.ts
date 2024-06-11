@@ -4,6 +4,26 @@ import { requireAuth, auth } from "./middleware";
 
 export const reviewRouter = express.Router();
 
+//Update the user's original review
+reviewRouter.put("/update/:courseID", requireAuth, async (req, res) => {
+  const { courseID: courseCode } = req.params;
+  const loggedInUser = await prisma.user.findUnique({
+    where: { firebase_uid: req.token!.uid },
+  });
+  const reviewData = req.body;
+
+  const reviews = await prisma.reviews.update({
+    where: {
+      course_code_user_id: {
+        user_id: loggedInUser.id,
+        course_code: courseCode,
+      },
+    },
+    data: reviewData,
+  });
+  res.status(200).send("success");
+});
+
 // Get all reviews under a course
 reviewRouter.get("/:courseID", async (req, res) => {
   const { courseID: courseCode } = req.params;
@@ -11,6 +31,29 @@ reviewRouter.get("/:courseID", async (req, res) => {
     const reviews = await prisma.reviews.findMany({
       where: {
         course_code: courseCode,
+      },
+    });
+    res.json(reviews);
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ error: "Failed to fetch reviews" });
+  }
+});
+
+//Get the user's review
+reviewRouter.get("/:courseID/myreview", requireAuth, async (req, res) => {
+  const { courseID: courseCode } = req.params;
+  const loggedInUser = await prisma.user.findUnique({
+    where: { firebase_uid: req.token!.uid },
+  });
+
+  try {
+    const reviews = await prisma.reviews.findUnique({
+      where: {
+        course_code_user_id: {
+          user_id: loggedInUser.id,
+          course_code: courseCode,
+        },
       },
     });
     res.json(reviews);
