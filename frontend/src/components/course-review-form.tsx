@@ -55,6 +55,7 @@ export const CourseReviewForm = ({
 
   console.log("Review Data:", myReviewData);
   const difficultyTooltips = [
+    //TODO: Should these be in a utils folder or something global so you don't have to update across pages/components?
     "Very Hard",
     "Hard",
     "Manageable",
@@ -121,14 +122,14 @@ export const CourseReviewForm = ({
           label="Easy"
           rules={[{ required: true }]}
         >
-          <Rate tooltips={difficultyTooltips} />
+          <Rate style={{ color: "#F9A602" }} tooltips={difficultyTooltips} />
         </Form.Item>
         <Form.Item
           name={["review", "interesting"]}
           label="Interesting"
           rules={[{ required: true }]}
         >
-          <Rate tooltips={interestingTooltips} />
+          <Rate style={{ color: "#F9A602" }} tooltips={interestingTooltips} />
         </Form.Item>
         <Form.Item
           name={["review", "liked"]}
