@@ -14,8 +14,9 @@ datasource db {
 }
 
 model User {
-  id       Int   @id @default(autoincrement())
-  email    String   @unique
-  name     String?
-  firebase_uid String @unique
+  id                  Int                   @id @default(autoincrement())
+  email               String                @unique
+  name                String?
+  firebase_uid        String                @unique
 }
+
