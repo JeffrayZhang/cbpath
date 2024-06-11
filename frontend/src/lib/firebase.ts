@@ -5,10 +5,13 @@ import {
   User,
   getAuth,
   reauthenticateWithPopup,
+  reauthenticateWithRedirect,
   signInWithPopup,
+  signInWithRedirect,
 } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { API_URL } from "./api";
+import MobileDetect from "mobile-detect";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -31,26 +34,39 @@ googleAuthProvider.addScope("https://www.googleapis.com/auth/userinfo.profile");
 type SupportedAuthProvider = GoogleAuthProvider;
 
 export async function deleteUser() {
+  const md = new MobileDetect(window.navigator.userAgent);
   if (!auth.currentUser) {
     throw new Error("User is not authenticated");
   }
-  try {
-    await auth.currentUser.delete();
-    window.location.replace("/");
-  } catch (error) {
-    if (
-      error instanceof FirebaseError &&
-      error.code === "auth/requires-recent-login"
-    ) {
-      reauthenticateWithPopup(auth.currentUser, googleAuthProvider);
+  let tries = 0;
+  while (true) {
+    try {
       await auth.currentUser.delete();
       window.location.replace("/");
+      return;
+    } catch (error) {
+      if (
+        error instanceof FirebaseError &&
+        error.code === "auth/requires-recent-login"
+      ) {
+        if (md.mobile()) {
+          await reauthenticateWithRedirect(
+            auth.currentUser,
+            googleAuthProvider,
+          );
+        } else {
+          await reauthenticateWithPopup(auth.currentUser, googleAuthProvider);
+        }
+        tries++;
+      }
+      if (tries > 1) {
+        alert(
+          "Failed to delete user firebase account. Please disable all popup blockers and try again.",
+        );
+        console.error("failed to delete user firebase account", error);
+        return;
+      }
     }
-    alert(
-      "User's profile and review data deleted, but firebase account remains.",
-    );
-    console.error("failed to delete user firebase account", error);
-    return;
   }
 }
 
@@ -64,8 +80,13 @@ export async function signIn(
   navigate: ((path: string) => void) | null = null,
 ) {
   let credentials;
+  const md = new MobileDetect(window.navigator.userAgent);
   try {
-    credentials = await signInWithPopup(auth, authProvider);
+    if (md.mobile()) {
+      credentials = await signInWithRedirect(auth, authProvider);
+    } else {
+      credentials = await signInWithPopup(auth, authProvider);
+    }
   } catch (error) {
     if (
       error instanceof FirebaseError &&

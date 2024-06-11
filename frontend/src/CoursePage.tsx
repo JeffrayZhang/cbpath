@@ -19,6 +19,7 @@ import {
   TableColumnsType,
   TableColumnType,
   Space,
+  ConfigProvider,
 } from "antd";
 import axios from "axios";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -34,6 +35,7 @@ import { CourseReviewForm } from "./components/course-review-form";
 import Search from "antd/lib/input/Search";
 import { SearchOutlined } from "@ant-design/icons";
 import { FilterDropdownProps } from "antd/es/table/interface";
+import MobileDetect from "mobile-detect";
 
 const difficultyTooltips = [
   "Very Hard",
@@ -119,6 +121,7 @@ export function CoursePage() {
   const navigate = useNavigate();
 
   const [openMyReview, setOpenMyReview] = useState(false);
+  const md = new MobileDetect(window.navigator.userAgent);
 
   const showMyReview = () => {
     setOpenMyReview(true);
@@ -343,103 +346,225 @@ export function CoursePage() {
           padding: "0px 20px",
         }}
       >
-        <h1 style={{ padding: "20px 0px" }}>
-          <span>
-            {courseData.code}:
-            <span style={{ paddingLeft: "15px" }}>
-              {courseData.is_ib_course ? (
-                <Tag
-                  color="blue"
-                  style={{
-                    fontSize: "20px",
-                    verticalAlign: "middle",
-                    height: "40px",
-                    padding: "10px",
-                    marginRight: "10px",
-                  }}
-                >
-                  IB Course
-                </Tag>
-              ) : null}
-              {courseData.elective ? (
-                <Tag
-                  color="green"
-                  style={{
-                    fontSize: "20px",
-                    verticalAlign: "middle",
-                    height: "40px",
-                    padding: "10px",
-                  }}
-                >
-                  Elective
-                </Tag>
-              ) : (
-                <Tag
-                  color="red"
-                  style={{
-                    fontSize: "20px",
-                    verticalAlign: "middle",
-                    height: "40px",
-                    padding: "10px",
-                  }}
-                >
-                  Required
-                </Tag>
-              )}
+        {!currentUser ? (
+          <div>
+            {md.mobile() ? (
+              <Button
+                onClick={() => signIn(googleAuthProvider, navigate)}
+                type="primary"
+                style={{
+                  position: "absolute",
+                  right: "5px",
+                  verticalAlign: "middle",
+                  height: "60px",
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                  maxWidth: "200px",
+                  padding: "10px",
+                }}
+              >
+                Sign In to Leave a Review!
+              </Button>
+            ) : (
+              <Button
+                onClick={() => signIn(googleAuthProvider, navigate)}
+                type="primary"
+                style={{
+                  position: "absolute",
+                  right: 44,
+                  verticalAlign: "middle",
+                  height: "60px",
+                  fontWeight: "bold",
+                  fontSize: "20px",
+                  minWidth: "200px",
+                }}
+              >
+                Sign In to Leave a Review!
+              </Button>
+            )}
+          </div>
+        ) : myReviewData ? (
+          <div>
+            {md.mobile() ? (
+              <Button
+                onClick={showMyReview}
+                type="primary"
+                style={{
+                  position: "absolute",
+                  right: "5px",
+                  verticalAlign: "middle",
+                  height: "60px",
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                  maxWidth: "200px",
+                  padding: "10px",
+                }}
+              >
+                Update your Review?
+              </Button>
+            ) : (
+              <Button
+                onClick={showMyReview}
+                type="primary"
+                style={{
+                  position: "absolute",
+                  right: 44,
+                  verticalAlign: "middle",
+                  height: "60px",
+                  fontWeight: "bold",
+                  fontSize: "20px",
+                  minWidth: "200px",
+                }}
+              >
+                Update your Review?
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div>
+            {md.mobile() ? (
+              <Button
+                onClick={showMyReview}
+                type="primary"
+                style={{
+                  position: "absolute",
+                  right: "5px",
+                  verticalAlign: "middle",
+                  height: "60px",
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                  maxWidth: "200px",
+                  padding: "10px",
+                }}
+              >
+                Leave your Review!
+              </Button>
+            ) : (
+              <Button
+                onClick={showMyReview}
+                type="primary"
+                style={{
+                  position: "absolute",
+                  right: 44,
+                  verticalAlign: "middle",
+                  height: "60px",
+                  fontWeight: "bold",
+                  fontSize: "20px",
+                  minWidth: "200px",
+                }}
+              >
+                Leave your Review!
+              </Button>
+            )}
+          </div>
+        )}
+        {md.mobile() ? (
+          <h1
+            style={{
+              padding: "80px 0px 0px 0px",
+              color: "gray",
+              fontSize: "30px",
+            }}
+          >
+            <span>
+              {courseData.code}:
+              <span style={{ paddingLeft: "5px" }}>
+                {courseData.is_ib_course ? (
+                  <Tag
+                    color="blue"
+                    style={{
+                      fontSize: "14px",
+                      verticalAlign: "middle",
+                      height: "40px",
+                      padding: "10px",
+                      marginRight: "8px",
+                    }}
+                  >
+                    IB Course
+                  </Tag>
+                ) : null}
+                {courseData.elective ? (
+                  <Tag
+                    color="green"
+                    style={{
+                      fontSize: "14px",
+                      verticalAlign: "middle",
+                      height: "40px",
+                      padding: "10px",
+                    }}
+                  >
+                    Elective
+                  </Tag>
+                ) : (
+                  <Tag
+                    color="red"
+                    style={{
+                      fontSize: "14px",
+                      verticalAlign: "middle",
+                      height: "40px",
+                      padding: "10px",
+                    }}
+                  >
+                    Required
+                  </Tag>
+                )}
+              </span>
             </span>
-          </span>
-          {!currentUser ? (
-            <Button
-              onClick={() => signIn(googleAuthProvider, navigate)}
-              type="primary"
-              style={{
-                position: "absolute",
-                right: 44,
-                verticalAlign: "middle",
-                height: "60px",
-                fontWeight: "bold",
-                fontSize: "20px",
-                minWidth: "200px",
-              }}
-            >
-              Sign In to Leave a Review!
-            </Button>
-          ) : myReviewData ? (
-            <Button
-              onClick={showMyReview}
-              type="primary"
-              style={{
-                position: "absolute",
-                right: 44,
-                verticalAlign: "middle",
-                height: "60px",
-                fontWeight: "bold",
-                fontSize: "20px",
-                minWidth: "200px",
-              }}
-            >
-              Update your Review?
-            </Button>
-          ) : (
-            <Button
-              onClick={showMyReview}
-              type="primary"
-              style={{
-                position: "absolute",
-                right: 44,
-                verticalAlign: "middle",
-                height: "60px",
-                fontWeight: "bold",
-                fontSize: "20px",
-                minWidth: "200px",
-              }}
-            >
-              Leave your Review!
-            </Button>
-          )}
-        </h1>
-        <h1>{courseData.title}</h1>
-        <p className="description">{courseData.description}</p>
+            <h1 style={{ color: "black", fontSize: 40 }}>{courseData.title}</h1>
+            <p className="description" style={{ fontSize: 20 }}>
+              {courseData.description}
+            </p>
+          </h1>
+        ) : (
+          <h1 style={{ padding: "70px 0px 0px 0px", color: "gray" }}>
+            <span>
+              {courseData.code}:
+              <span style={{ paddingLeft: "15px" }}>
+                {courseData.is_ib_course ? (
+                  <Tag
+                    color="blue"
+                    style={{
+                      fontSize: "20px",
+                      verticalAlign: "middle",
+                      height: "40px",
+                      padding: "8px",
+                      marginRight: "10px",
+                    }}
+                  >
+                    IB Course
+                  </Tag>
+                ) : null}
+                {courseData.elective ? (
+                  <Tag
+                    color="green"
+                    style={{
+                      fontSize: "20px",
+                      verticalAlign: "middle",
+                      height: "42px",
+                      padding: "8px",
+                    }}
+                  >
+                    Elective
+                  </Tag>
+                ) : (
+                  <Tag
+                    color="red"
+                    style={{
+                      fontSize: "20px",
+                      verticalAlign: "middle",
+                      height: "40px",
+                      padding: "8px",
+                    }}
+                  >
+                    Required
+                  </Tag>
+                )}
+              </span>
+            </span>
+            <h1 style={{ color: "black", fontSize: 60 }}>{courseData.title}</h1>
+            <p className="description">{courseData.description}</p>
+          </h1>
+        )}
         <Drawer
           title={
             myReviewData ? (
@@ -472,26 +597,26 @@ export function CoursePage() {
         ) : (
           <div>
             <h2 style={{ marginBottom: "20px" }}>Average Course Reviews</h2>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                marginBottom: "20px",
-                alignItems: "center",
-              }}
-            >
-              <Progress
-                type="circle"
-                percent={Math.round(
-                  (allCourseReviews.numLiked /
-                    allCourseReviews.reviews.length) *
-                    100,
-                )}
-                format={(percent) => `${percent}% liked`}
-                size={200}
-              />
-              <div style={{ padding: "25px 50px" }}>
-                <div style={{ marginBottom: "30px" }}>
+            {md.mobile() ? (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  marginBottom: "20px",
+                  alignItems: "left",
+                }}
+              >
+                <Progress
+                  type="circle"
+                  percent={Math.round(
+                    (allCourseReviews.numLiked /
+                      allCourseReviews.reviews.length) *
+                      100,
+                  )}
+                  format={(percent) => `${percent}% liked`}
+                  size={170}
+                />
+                <div style={{ marginTop: "20px" }}>
                   <h2 style={{ fontSize: "20px" }}>
                     Difficulty? "
                     {
@@ -511,34 +636,98 @@ export function CoursePage() {
                     )}
                   />
                 </div>
-                <div>
-                  <h2 style={{ fontSize: "20px" }}>
-                    Interesting? "
-                    {
-                      interestingTooltips[
-                        Math.round(
-                          allCourseReviews.avgReviews._avg.interesting,
-                        ) - 1
-                      ]
-                    }
-                    "
-                  </h2>
-                  <Rate
-                    style={{ color: "#F9A602" }}
-                    disabled
-                    value={Math.round(
-                      allCourseReviews.avgReviews._avg.interesting,
-                    )}
-                  />
+                <div style={{ marginTop: "20px", marginBottom: "20px" }}>
+                  <div>
+                    <h2 style={{ fontSize: "20px" }}>
+                      Interesting? "
+                      {
+                        interestingTooltips[
+                          Math.round(
+                            allCourseReviews.avgReviews._avg.interesting,
+                          ) - 1
+                        ]
+                      }
+                      "
+                    </h2>
+                    <Rate
+                      style={{ color: "#F9A602" }}
+                      disabled
+                      value={Math.round(
+                        allCourseReviews.avgReviews._avg.interesting,
+                      )}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  marginBottom: "20px",
+                  alignItems: "center",
+                }}
+              >
+                <Progress
+                  type="circle"
+                  percent={Math.round(
+                    (allCourseReviews.numLiked /
+                      allCourseReviews.reviews.length) *
+                      100,
+                  )}
+                  format={(percent) => `${percent}% liked`}
+                  size={170}
+                />
+                <div style={{ padding: "25px 20px" }}>
+                  <div style={{ marginBottom: "30px" }}>
+                    <h2 style={{ fontSize: "20px" }}>
+                      Difficulty? "
+                      {
+                        difficultyTooltips[
+                          Math.round(
+                            allCourseReviews.avgReviews._avg.difficulty,
+                          ) - 1
+                        ]
+                      }
+                      "
+                    </h2>
+                    <Rate
+                      style={{ color: "#F9A602" }}
+                      disabled
+                      value={Math.round(
+                        allCourseReviews.avgReviews._avg.difficulty,
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: "20px" }}>
+                      Interesting? "
+                      {
+                        interestingTooltips[
+                          Math.round(
+                            allCourseReviews.avgReviews._avg.interesting,
+                          ) - 1
+                        ]
+                      }
+                      "
+                    </h2>
+                    <Rate
+                      style={{ color: "#F9A602" }}
+                      disabled
+                      value={Math.round(
+                        allCourseReviews.avgReviews._avg.interesting,
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
             <h2>All Reviews (total: {allCourseReviews.reviews.length} )</h2>
             {allCourseReviews && (
               <Table
                 dataSource={dataSourceAllReviews}
                 columns={columnsAllReviews}
-                style={{ padding: "20px 0px" }}
+                style={{ padding: "20px 0px", overflow: "scroll" }}
                 pagination={{ position: [bottom] }}
               />
             )}
