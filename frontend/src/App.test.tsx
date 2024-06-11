@@ -3,6 +3,6 @@ import App from './App';
 
 test('renders the page without blowing up (smoke-test)', () => {
   render(<App />);
-  const textOnPage = screen.getByText(/save to reload/i);
+  const textOnPage = screen.getByText(/Home page!/i);
   expect(textOnPage).toBeInTheDocument();
 });
