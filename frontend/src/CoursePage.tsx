@@ -1,19 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Input, InputNumber, Button, message } from "antd";
 import axios from "axios";
-import { useParams } from "react-router-dom"; // 1. Import useParams
+import { useParams } from "react-router-dom";
 
 const CustomForm: React.FC = () => {
   const [form] = Form.useForm();
-  const { courseCode } = useParams(); // 2. Use useParams to extract course code
+  const { courseID: courseCode } = useParams(); // 2. Use useParams to extract course code
 
   const [formValues, setFormValues] = useState({
+    course_code: "", // Include course code in form values
     title: "",
     content: "",
     difficulty: 0,
     interesting: 0,
     liked: false,
   });
+
+  useEffect(() => {
+    if (courseCode) {
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        course_code: courseCode, // Update course code in form values
+      }));
+    }
+  }, [courseCode]);
 
   const handleRatingChange = (value: number) => {
     setFormValues({ ...formValues, interesting: value });
@@ -25,10 +35,7 @@ const CustomForm: React.FC = () => {
 
   const onFinish = async (values: any) => {
     try {
-      const response = await axios.post("/review", {
-        ...values,
-        course_code: courseCode,
-      }); // Include course code in the request
+      const response = await axios.post("/review", values);
       console.log("Review submitted:", response.data);
       message.success("Review submitted successfully");
       form.resetFields();
@@ -47,7 +54,14 @@ const CustomForm: React.FC = () => {
       wrapperCol={{ span: 16 }}
       style={{ maxWidth: 600 }}
     >
-      {/* Remove course_code field from the form */}
+      <Form.Item
+        name="course_code"
+        label="Course Code"
+        rules={[{ required: true, message: "Please enter the course code!" }]}
+      >
+        <Input disabled value={formValues.course_code} />{" "}
+        {/* Display course code as disabled input */}
+      </Form.Item>
       <Form.Item name="title" label="Title" rules={[{ required: true }]}>
         <Input />
       </Form.Item>
