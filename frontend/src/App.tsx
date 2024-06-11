@@ -6,46 +6,41 @@ import { API_URL } from './lib/api';
 import { googleAuthProvider, signIn, useCurrentUser } from './lib/firebase';
 import logo from './logo.svg';
 import { CourseForm, CourseTable } from './components/course-components';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
-type BasicUser = {
-  id: number
-  name?: string
-}
+/* === REPLACE ME === */
+const ProfilePage = () => (<div>
+  <p>Profile page!</p>
+  <a href="/">Back to home page</a>
+</div>)
+const SignInPage = () => <div><p>SignIn page!</p><GoogleLoginButton onClick={() => signIn(googleAuthProvider)} /></div>
+const HomePage = () => (<div>
+  <img src={logo} className="App-logo" alt="logo" />
+  <p>Home page!</p>
+  <a href="/profile">Go to profile page</a>
+</div>)
+/* === REPLACE ME === */
 
-const LoginForm = () => {  
-  return (
-    <GoogleLoginButton onClick={() => signIn(googleAuthProvider)} />
-  )  
-}
+const router = createBrowserRouter([
+  {
+    path: "/profile",
+    element: <ProfilePage />,
+  },
+  {
+    path: '/signin',
+    element: <SignInPage />,
+  },
+  {
+    path: '/',
+    element: <HomePage />,
+  },
+]);
+
 
 function App() {
-  const [users, setUsers] = useState<BasicUser[]>([])
-  const user = useCurrentUser()
-
-  useEffect(() => {
-    // when component mounts, get a list of the users
-    (async function () {
-      const response = await axios.get(`${API_URL}/user`)
-      setUsers(response.data)
-    })()
-  }, [])
-
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <p>You {user === null ? "aren't" : 'are'} logged in!</p>
-        <h2>Registered users:</h2>
-        <ul>
-          {users.map(user => <li key={user.id}>#{user.id}: {user.name}</li>)}
-        </ul>
-        <LoginForm />
-        {user && <CourseForm />}
-        {user && <CourseTable />}
-      </header>
+      <RouterProvider router={router} />
     </div>
   );
 }
