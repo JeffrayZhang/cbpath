@@ -35,7 +35,7 @@ const CustomForm: React.FC = () => {
 
   const onFinish = async (values: any) => {
     try {
-      const response = await axios.post("/review", values);
+      const response = await axios.post("/reviews", values);
       console.log("Review submitted:", response.data);
       message.success("Review submitted successfully");
       form.resetFields();
@@ -57,7 +57,7 @@ const CustomForm: React.FC = () => {
       <Form.Item
         name="course_code"
         label="Course Code"
-        rules={[{ required: true, message: "Please enter the course code!" }]}
+        rules={[{ required: false, message: "Please enter the course code!" }]}
       >
         <Input disabled value={formValues.course_code} />{" "}
         {/* Display course code as disabled input */}
