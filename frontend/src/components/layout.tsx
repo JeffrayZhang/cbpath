@@ -7,6 +7,7 @@ import {
   useLocation,
   type createBrowserRouter,
 } from "react-router-dom";
+import ConfirmModal from "./confirm-modal";
 
 const { Header, Content, Footer } = Layout;
 
@@ -35,6 +36,11 @@ export const PageLayout = ({
   const onClose = () => {
     setOpen(false);
   };
+
+  function deleteAccount() {
+    //TODO! Replace with firebase delete account function
+    window.location.replace(`/`);
+  }
 
   return (
     <Layout>
@@ -94,14 +100,22 @@ export const PageLayout = ({
                   <Menu.Item
                     style={{ fontWeight: "bold", fontSize: "20px" }}
                     key="sign-out"
-                    onClick={() => window.location.replace("/")}
+                    onClick={() => window.location.replace("/")} //TODO: Replace with the firebase sign out function
                   >
                     Sign Out
                   </Menu.Item>
                   <Menu.Item
                     key="delete"
                     style={{ color: "red", fontSize: "16px" }}
-                    onClick={() => window.location.replace("/")}
+                    onClick={() =>
+                      ConfirmModal(
+                        "Are you sure?",
+                        "By deleting your account under " +
+                          currentUser.email +
+                          ", all data, including your course reviews, will be deleted as well. \n \n This action cannot be undone.",
+                        deleteAccount,
+                      )
+                    }
                   >
                     Delete Account
                   </Menu.Item>
