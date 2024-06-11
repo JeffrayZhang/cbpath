@@ -36,3 +36,13 @@
     transform: rotate(360deg);
   }
 }
+
+.content-container {
+  min-height: calc(100vh - 134px);
+}
+
+@media only screen and (max-width: 756px) {
+  .content-container {
+    min-height: calc(100vh - 234px);
+  }
+}

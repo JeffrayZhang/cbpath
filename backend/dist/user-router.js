@@ -9,7 +9,7 @@ const db_1 = require("./db");
 const middleware_1 = require("./middleware");
 exports.userRouter = express_1.default.Router();
 // get all users
-exports.userRouter.get('/', async (req, res) => {
+exports.userRouter.get("/", async (req, res) => {
     const users = await db_1.prisma.user.findMany();
     const responseBody = [];
     for (const user of users) {
@@ -22,11 +22,15 @@ exports.userRouter.get('/', async (req, res) => {
     res.json(responseBody);
 });
 // create a new user
-exports.userRouter.post('/', middleware_1.requireAuth, async (req, res) => {
+exports.userRouter.post("/", middleware_1.requireAuth, async (req, res) => {
     const { email, uid } = req.token;
     const firebaseUser = await middleware_1.auth.getUser(uid);
     if (email.trim().length === 0)
-        throw new Error('email is required');
+        throw new Error("email is required");
+    const oldUser = await db_1.prisma.user.findUnique({
+        where: { firebase_uid: uid },
+    });
+    const needsMoreInfo = !oldUser;
     const newUser = await db_1.prisma.user.upsert({
         where: { firebase_uid: uid },
         create: {
@@ -37,33 +41,34 @@ exports.userRouter.post('/', middleware_1.requireAuth, async (req, res) => {
         update: {
             email,
             name: firebaseUser.displayName,
-        }
+        },
     });
     res.json({
         id: newUser.id,
         email: newUser.email,
         name: newUser.name,
+        needsMoreInfo,
     });
 });
-exports.userRouter.put('/', middleware_1.requireAuth, async (req, res) => {
+exports.userRouter.put("/", middleware_1.requireAuth, async (req, res) => {
     const { email, uid } = req.token;
     const firebaseUser = await middleware_1.auth.getUser(uid);
     const userData = req.body;
     const user = await db_1.prisma.user.update({
         where: {
-            firebase_uid: uid
+            firebase_uid: uid,
         },
-        data: userData
+        data: userData,
     });
-    res.status(200).send('success');
+    res.status(200).send("success");
 });
-exports.userRouter.get('/currentUser', middleware_1.requireAuth, async (req, res) => {
+exports.userRouter.get("/currentUser", middleware_1.requireAuth, async (req, res) => {
     const { email, uid } = req.token;
     const firebaseUser = await middleware_1.auth.getUser(uid);
     const userData = req.body;
     const user = await db_1.prisma.user.findUnique({
         where: {
-            firebase_uid: uid
+            firebase_uid: uid,
         },
     });
     res.status(200).json(user);
