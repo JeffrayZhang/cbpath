@@ -125,10 +125,12 @@ reviewRouter.post("/", requireAuth, async (req, res) => {
   }
 
   // Check if the user has already submitted a review for the given course
-  const existingReview = await prisma.reviews.findFirst({
+  const existingReview = await prisma.reviews.findUnique({
     where: {
-      user_id: loggedInUser.id,
-      course_code: course_code,
+      course_code_user_id: {
+        user_id: loggedInUser.id,
+        course_code: course_code,
+      },
     },
   });
 

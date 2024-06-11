@@ -4,6 +4,7 @@ import {
   GoogleAuthProvider,
   User,
   getAuth,
+  reauthenticateWithPopup,
   signInWithPopup,
 } from "firebase/auth";
 import { useEffect, useState } from "react";
@@ -28,6 +29,35 @@ export const googleAuthProvider = new GoogleAuthProvider();
 googleAuthProvider.addScope("https://www.googleapis.com/auth/userinfo.profile");
 
 type SupportedAuthProvider = GoogleAuthProvider;
+
+export async function deleteUser() {
+  if (!auth.currentUser) {
+    throw new Error("User is not authenticated");
+  }
+  try {
+    await auth.currentUser.delete();
+    window.location.replace("/");
+  } catch (error) {
+    if (
+      error instanceof FirebaseError &&
+      error.code === "auth/requires-recent-login"
+    ) {
+      reauthenticateWithPopup(auth.currentUser, googleAuthProvider);
+      await auth.currentUser.delete();
+      window.location.replace("/");
+    }
+    alert(
+      "User's profile and review data deleted, but firebase account remains.",
+    );
+    console.error("failed to delete user firebase account", error);
+    return;
+  }
+}
+
+export async function signOut() {
+  await auth.signOut();
+  window.location.replace("/");
+}
 
 export async function signIn(
   authProvider: SupportedAuthProvider,

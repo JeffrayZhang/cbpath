@@ -296,7 +296,7 @@ export function CoursePage() {
           ...getColumnSearchProps("content"),
         },
         {
-          title: "Easy (out of 5)",
+          title: "Easy",
           dataIndex: "difficulty",
           key: "difficulty",
           sorter: (a: Review, b: Review) => a.difficulty - b.difficulty,
@@ -304,7 +304,7 @@ export function CoursePage() {
             difficulty + ": " + difficultyTooltips[difficulty - 1],
         },
         {
-          title: "Interesting (out of 5)",
+          title: "Interesting",
           dataIndex: "interesting",
           key: "interesting",
           sorter: (a: Review, b: Review) => a.difficulty - b.difficulty,
@@ -515,7 +515,7 @@ export function CoursePage() {
                   <h2 style={{ fontSize: "20px" }}>
                     Interesting? "
                     {
-                      difficultyTooltips[
+                      interestingTooltips[
                         Math.round(
                           allCourseReviews.avgReviews._avg.interesting,
                         ) - 1
@@ -533,7 +533,7 @@ export function CoursePage() {
                 </div>
               </div>
             </div>
-            <h2>All Reviews</h2>
+            <h2>All Reviews (total: {allCourseReviews.reviews.length} )</h2>
             {allCourseReviews && (
               <Table
                 dataSource={dataSourceAllReviews}

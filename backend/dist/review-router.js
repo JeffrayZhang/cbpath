@@ -116,10 +116,12 @@ exports.reviewRouter.post("/", middleware_1.requireAuth, async (req, res) => {
         return res.status(400).json({ error: "Title and content are needed" });
     }
     // Check if the user has already submitted a review for the given course
-    const existingReview = await db_1.prisma.reviews.findFirst({
+    const existingReview = await db_1.prisma.reviews.findUnique({
         where: {
-            user_id: loggedInUser.id,
-            course_code: course_code,
+            course_code_user_id: {
+                user_id: loggedInUser.id,
+                course_code: course_code,
+            },
         },
     });
     if (existingReview) {

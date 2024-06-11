@@ -3,6 +3,24 @@ import { prisma } from "./db";
 import { requireAuth, auth } from "./middleware";
 export const userRouter = express.Router();
 
+userRouter.delete("/delete", requireAuth, async (req, res) => {
+  const { uid } = req.token!;
+  const user = await prisma.user.findUnique({
+    where: { firebase_uid: uid },
+  });
+  await prisma.reviews.deleteMany({
+    where: {
+      user_id: user.id,
+    },
+  });
+  await prisma.user.delete({
+    where: {
+      id: user.id,
+    },
+  });
+  res.status(200).send("success");
+});
+
 // get all users
 userRouter.get("/", async (req, res) => {
   const users = await prisma.user.findMany();
