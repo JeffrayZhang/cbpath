@@ -18,5 +18,22 @@ model User {
   email               String                @unique
   name                String?
   firebase_uid        String                @unique
+  student_relationships StudentRelationship[]
 }
 
+model Course {
+  code                String                @id // MATH-101
+  title               String // Intro to Math
+  description         String
+  is_ib_course        Boolean               @default(false)
+  student_relationships StudentRelationship[]
+}
+
+// join table
+model StudentRelationship {
+  id          Int    @id @default(autoincrement())
+  course      Course @relation(fields: [course_code], references: [code])
+  course_code String
+  user        User   @relation(fields: [user_id], references: [id])
+  user_id     Int
+}
