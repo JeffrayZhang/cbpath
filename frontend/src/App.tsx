@@ -5,6 +5,7 @@ import './App.css';
 import { API_URL } from './lib/api';
 import { googleAuthProvider, signIn, useCurrentUser } from './lib/firebase';
 import logo from './logo.svg';
+import { CourseForm, CourseTable } from './components/course-components';
 
 type BasicUser = {
   id: number
@@ -42,6 +43,8 @@ function App() {
           {users.map(user => <li key={user.id}>#{user.id}: {user.name}</li>)}
         </ul>
         <LoginForm />
+        {user && <CourseForm />}
+        {user && <CourseTable />}
       </header>
     </div>
   );
