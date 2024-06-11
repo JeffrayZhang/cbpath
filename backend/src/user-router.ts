@@ -41,3 +41,27 @@ userRouter.post('/', requireAuth, async (req, res) => {
         name: newUser.name,
     })
 })
+userRouter.put('/', requireAuth, async (req, res) => {
+    const { email, uid } = req.token!;
+    const firebaseUser = await auth.getUser(uid)
+    const userData = req.body;
+
+    const user = await prisma.user.update({
+        where:{
+            firebase_uid: uid
+        },
+        data:userData
+    })
+    res.status(200).send('success')
+})
+userRouter.get('/currentUser', requireAuth, async (req, res) => {
+    const { email, uid } = req.token!;
+    const firebaseUser = await auth.getUser(uid)
+    const userData = req.body;
+    const user = await prisma.user.findUnique({
+        where:{
+            firebase_uid: uid
+        },
+    })
+    res.status(200).json(user)
+})

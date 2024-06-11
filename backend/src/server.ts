@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import { userRouter } from './user-router';
 import { courseRouter } from './course-router';
+import { reviewRouter } from './review-router';
 const app = express()
 const port = 8000
 
@@ -27,6 +28,7 @@ app.get('/', (req, res) => {
 
 app.use('/user', userRouter)
 app.use('/course', courseRouter)
+app.use('/review', reviewRouter)
 
 app.listen(port, () => {
   console.log(`Example app listening on http://localhost:${port}`)

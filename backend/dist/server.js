@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const user_router_1 = require("./user-router");
 const course_router_1 = require("./course-router");
+const review_router_1 = require("./review-router");
 const app = (0, express_1.default)();
 const port = 8000;
 app.use((0, cors_1.default)({ origin: '*' }));
@@ -29,6 +30,7 @@ app.get('/', (req, res) => {
 });
 app.use('/user', user_router_1.userRouter);
 app.use('/course', course_router_1.courseRouter);
+app.use('/review', review_router_1.reviewRouter);
 app.listen(port, () => {
     console.log(`Example app listening on http://localhost:${port}`);
 });

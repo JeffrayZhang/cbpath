@@ -8,12 +8,10 @@ import logo from './logo.svg';
 import { CourseForm, CourseTable } from './components/course-components';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { PageLayout } from './components/layout';
+import { Profile } from './Profile';
 
 /* === REPLACE ME === */
-const ProfilePage = () => (<div>
-  <p>Profile page!</p>
-  <a href="/">Back to home page</a>
-</div>)
+
 const SignInPage = () => <div><p>SignIn page!</p><GoogleLoginButton onClick={() => signIn(googleAuthProvider)} /></div>
 const HomePage = () => (<div>
   <img src={logo} className="App-logo" alt="logo" />
@@ -25,7 +23,7 @@ const HomePage = () => (<div>
 const router = createBrowserRouter([
   {
     path: "/profile",
-    element: <ProfilePage />,
+    element: <Profile/>,
   },
   {
     path: '/signin',

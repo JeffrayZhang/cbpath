@@ -20,14 +20,19 @@ model User {
   firebase_uid          String                @unique
   student_relationships StudentRelationship[]
   reviews               Reviews[]
+  grade                 String?
+  graduationYear        Int?
+  isIb                  Boolean?
 }
 
 model Course {
   code                  String                @id // MATH-101
   title                 String // Intro to Math
-  description           String
+  description           String?
+  prerequesites         String[]
   is_ib_course          Boolean               @default(false)
   student_relationships StudentRelationship[]
+  elective              Boolean
   reviews               Reviews[]
 }
 
@@ -41,10 +46,15 @@ model StudentRelationship {
 }
 
 model Reviews {
-  id          Int    @id @default(autoincrement())
-  course      Course @relation(fields: [course_code], references: [code])
+  id          Int      @id @default(autoincrement())
+  course      Course   @relation(fields: [course_code], references: [code])
   course_code String
-  user        User   @relation(fields: [user_id], references: [id])
+  user        User     @relation(fields: [user_id], references: [id])
   user_id     Int
-  review      String
+  title       String?
+  content     String?
+  difficulty  Int
+  interesting Int
+  liked       Boolean
+  lastUpdated DateTime
 }

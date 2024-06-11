@@ -45,4 +45,27 @@ exports.userRouter.post('/', middleware_1.requireAuth, async (req, res) => {
         name: newUser.name,
     });
 });
+exports.userRouter.put('/', middleware_1.requireAuth, async (req, res) => {
+    const { email, uid } = req.token;
+    const firebaseUser = await middleware_1.auth.getUser(uid);
+    const userData = req.body;
+    const user = await db_1.prisma.user.update({
+        where: {
+            firebase_uid: uid
+        },
+        data: userData
+    });
+    res.status(200).send('success');
+});
+exports.userRouter.get('/currentUser', middleware_1.requireAuth, async (req, res) => {
+    const { email, uid } = req.token;
+    const firebaseUser = await middleware_1.auth.getUser(uid);
+    const userData = req.body;
+    const user = await db_1.prisma.user.findUnique({
+        where: {
+            firebase_uid: uid
+        },
+    });
+    res.status(200).json(user);
+});
 //# sourceMappingURL=user-router.js.map

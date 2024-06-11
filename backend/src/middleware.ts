@@ -11,7 +11,7 @@ export const auth = getAuth(app)
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
     const idToken = req.headers['idtoken']
     if (typeof idToken !== 'string') return res.status(401).send('Unauthorized');
-
+    
     // bypass for development
     if(process.env.NODE_ENV !== 'production' && req.headers['test-user-override']) {
         const user = await getOrCreateTestUser()
