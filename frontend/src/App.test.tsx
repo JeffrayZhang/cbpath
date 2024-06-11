@@ -1,8 +1,10 @@
-import { render, screen } from '@testing-library/react';
-import App from './App';
+import { render, screen } from "@testing-library/react";
+import App from "./App";
 
-test('renders the page without blowing up (smoke-test)', () => {
+test("renders the page without blowing up (smoke-test)", () => {
   render(<App />);
-  const textOnPage = screen.getByText(/Home page!/i);
+  const textOnPage = screen.getByText(
+    /Search for any CB Course and see what other students had to say!/i,
+  );
   expect(textOnPage).toBeInTheDocument();
 });
