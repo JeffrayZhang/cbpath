@@ -4,14 +4,16 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node-dev src/server.ts",
+    "start": "dotenv -e ../.env ts-node-dev src/server.ts",
     "build": "tsc",
     "start:production": "node dist/server.js",
-    "postinstall": "cd .. && husky backend/.husky"
+    "postinstall": "cd .. && husky backend/.husky",
+    "prisma": "dotenv -e ../.env prisma"
   },
   "dependencies": {
+    "@prisma/client": "5.10.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
+    "dotenv-cli": "^7.3.0",
     "express": "^4.18.3"
   },
   "devDependencies": {
@@ -21,6 +23,7 @@
     "@types/node": "^20.11.24",
     "husky": "^9.0.11",
     "jest": "^29.7.0",
+    "prisma": "^5.10.2",
     "ts-jest": "^29.1.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3"
