@@ -26,10 +26,6 @@ export const CourseReviewForm = ({
   const [form] = Form.useForm();
   const loggedInUser = useCurrentUser();
 
-  const [lastUpdated, setLastUpdated] = useState(
-    convertToLocalTime(myReviewData.lastUpdated),
-  );
-
   const onFinish = async (values: any) => {
     try {
       if (!loggedInUser || !loggedInUser) {
@@ -48,7 +44,6 @@ export const CourseReviewForm = ({
             { ...values.review, lastUpdated: new Date() },
           );
         }
-        setLastUpdated(new Date().toLocaleString());
         console.log("Review submitted successfully:", response.data);
         message.success("Review submitted successfully");
       }
@@ -75,9 +70,9 @@ export const CourseReviewForm = ({
   ];
   return (
     <div>
-      {{ myReviewData } ? (
+      {myReviewData ? (
         <p>
-          <i>Last Updated: {lastUpdated}</i>
+          <i>Last Updated: {convertToLocalTime(myReviewData.lastUpdated)}</i>
         </p>
       ) : null}
       <Form

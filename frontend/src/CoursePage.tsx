@@ -17,8 +17,13 @@ import {
   Tag,
 } from "antd";
 import axios from "axios";
-import { useParams } from "react-router-dom";
-import { authenticatedApiRequest, useCurrentUser } from "./lib/firebase";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  authenticatedApiRequest,
+  signIn,
+  useCurrentUser,
+  googleAuthProvider,
+} from "./lib/firebase";
 import { API_URL } from "./lib/api";
 import { ErrorCourseNotFound } from "./components/error-course-not-found";
 import { CourseReviewForm } from "./components/course-review-form";
@@ -64,6 +69,7 @@ export function CoursePage() {
   const [myReviewData, setMyReviewData] = useState<Review>();
   const [top, setTop] = useState<TablePaginationPosition>("topLeft");
   const [bottom, setBottom] = useState<TablePaginationPosition>("bottomRight");
+  const navigate = useNavigate();
 
   const [openMyReview, setOpenMyReview] = useState(false);
 
@@ -120,16 +126,17 @@ export function CoursePage() {
   ];
 
   useEffect(() => {
-    if (!currentUser) return;
     // when component mounts, check if courseCode exists
     (async function () {
       try {
+        if (currentUser) {
+          const reviewResponse = await authenticatedApiRequest(
+            "GET",
+            `/review/${courseID}/myreview`,
+          );
+          setMyReviewData(reviewResponse.data);
+        }
         const response = await axios.get(`${API_URL}/course/${courseID}`);
-        const reviewResponse = await authenticatedApiRequest(
-          "GET",
-          `/review/${courseID}/myreview`,
-        );
-        setMyReviewData(reviewResponse.data);
         setCourseData(response.data);
       } catch (error) {
         setCourseData(undefined);
@@ -138,6 +145,7 @@ export function CoursePage() {
     })();
   }, [setCourseData, setMyReviewData, currentUser]);
 
+  console.log(myReviewData);
   if (!courseData) {
     return <ErrorCourseNotFound />;
   } else {
@@ -195,7 +203,23 @@ export function CoursePage() {
               )}
             </span>
           </span>
-          {{ myReviewData } ? (
+          {!currentUser ? (
+            <Button
+              onClick={() => signIn(googleAuthProvider, navigate)}
+              type="primary"
+              style={{
+                position: "absolute",
+                right: 44,
+                verticalAlign: "middle",
+                height: "60px",
+                fontWeight: "bold",
+                fontSize: "20px",
+                minWidth: "200px",
+              }}
+            >
+              Sign In to Leave a Review!
+            </Button>
+          ) : myReviewData ? (
             <Button
               onClick={showMyReview}
               type="primary"
@@ -213,12 +237,16 @@ export function CoursePage() {
             </Button>
           ) : (
             <Button
+              onClick={showMyReview}
               type="primary"
               style={{
+                position: "absolute",
+                right: 44,
                 verticalAlign: "middle",
                 height: "60px",
                 fontWeight: "bold",
                 fontSize: "20px",
+                minWidth: "200px",
               }}
             >
               Leave your Review!
@@ -229,7 +257,7 @@ export function CoursePage() {
         <p className="description">{courseData.description}</p>
         <Drawer
           title={
-            { myReviewData } ? (
+            myReviewData ? (
               <h2>Update your Review</h2>
             ) : (
               <h2>Leave your Review</h2>
@@ -243,12 +271,15 @@ export function CoursePage() {
             myReviewData={myReviewData}
           />
         </Drawer>
+
         <Collapse
           items={items}
           defaultActiveKey={[]}
           style={{ fontSize: "20px", marginBottom: "20px" }}
         />
+
         <hr className="solid"></hr>
+
         <h2 style={{ marginBottom: "20px" }}>Average Course Reviews</h2>
         <div
           style={{
