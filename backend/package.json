@@ -8,7 +8,8 @@
     "build": "tsc",
     "start:production": "node dist/server.js",
     "postinstall": "cd .. && husky backend/.husky",
-    "prisma": "dotenv -e ../.env prisma"
+    "prisma": "dotenv -e ../.env prisma --",
+    "prisma:production": "dotenv -e ../.env.prod prisma --"
   },
   "dependencies": {
     "@prisma/client": "5.10.2",
