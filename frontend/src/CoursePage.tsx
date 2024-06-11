@@ -1,183 +1,92 @@
-import { RouterProvider, useNavigate, useParams } from "react-router-dom";
-import { PageLayout } from "./components/layout";
-import { useState, useEffect } from "react";
-import { authenticatedApiRequest, useCurrentUser } from "./lib/firebase";
-import axios, { AxiosError, isAxiosError } from "axios";
-import { API_URL } from "./lib/api";
-import { message } from "antd";
+import React, { useState } from "react";
+import { Form, Input, InputNumber, Button, message } from "antd";
+import axios from "axios";
+import { useParams } from "react-router-dom"; // 1. Import useParams
 
-interface Review {
-  course_code: string;
-  title?: string;
-  content?: string;
-  difficulty: number;
-  interesting: number;
-  liked: boolean;
-  lastUpdated: Date;
-}
+const CustomForm: React.FC = () => {
+  const [form] = Form.useForm();
+  const { courseCode } = useParams(); // 2. Use useParams to extract course code
 
-const CustomForm: React.FC<{ existingReview?: Review }> = ({
-  existingReview,
-}) => {
-  const [formValues, setFormValues] = useState<Review>({
-    course_code: "",
+  const [formValues, setFormValues] = useState({
     title: "",
     content: "",
     difficulty: 0,
     interesting: 0,
     liked: false,
-    lastUpdated: new Date(),
-    ...existingReview,
   });
 
-  const loggedInUser = useCurrentUser();
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormValues({
-      ...formValues,
-      [name]: value,
-      lastUpdated: new Date(), // Update last updated time whenever any field changes
-    });
+  const handleRatingChange = (value: number) => {
+    setFormValues({ ...formValues, interesting: value });
   };
 
   const handleLikedChange = (liked: boolean) => {
-    setFormValues({
-      ...formValues,
-      liked,
-      lastUpdated: new Date(), // Update last updated time when liked status changes
-    });
+    setFormValues({ ...formValues, liked });
   };
 
-  const handleRatingChange = (
-    type: "difficulty" | "interesting",
-    value: number,
-  ) => {
-    setFormValues({
-      ...formValues,
-      [type]: value,
-      lastUpdated: new Date(),
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onFinish = async (values: any) => {
     try {
-      if (!loggedInUser || !loggedInUser) {
-        throw new Error("User not logged in or token not available");
-      } 
-      else{
-        const response = await authenticatedApiRequest("POST", "/review", formValues);
-        console.log("Review submitted successfully:", response.data);
-        message.success("Review submitted successfully");
-      }
-
-    } catch (error) 
-    {
-      console.error("Error submitting review:", error || error);
+      const response = await axios.post("/review", {
+        ...values,
+        course_code: courseCode,
+      }); // Include course code in the request
+      console.log("Review submitted:", response.data);
+      message.success("Review submitted successfully");
+      form.resetFields();
+    } catch (error) {
+      console.error("Error submitting review:", error);
       message.error("Failed to submit review. Please try again later.");
     }
   };
-  
-  
 
-return(<form onSubmit={handleSubmit}>
-  <label>
-    Course Code:
-    <input
-      type="text"
-      name="course_code"
-      value={formValues.course_code}
-      onChange={handleChange}
-    />
-  </label>
-  <br />
-  <label>
-    Title:
-    <input
-      type="text"
-      name="title"
-      value={formValues.title}
-      onChange={handleChange}
-    />
-  </label>
-  <br />
-  <label>
-    Content:
-    <textarea
-      name="content"
-      value={formValues.content}
-      onChange={handleChange}
-    />
-  </label>
-  <br />
-  <label>
-    Difficulty:
-    <input
-      type="number"
-      name="difficulty"
-      value={formValues.difficulty}
-      onChange={handleChange}
-    />
-  </label>
-  <br />
-  <label>
-    Interesting:
-    <div>
-      {[1, 2, 3, 4, 5].map((value) => (
-        <span
-          key={value}
-          onClick={() => handleRatingChange("interesting", value)}
-          style={{ cursor: "pointer" }}
-        >
-          ⭐
-        </span>
-      ))}
-    </div>
-  </label>
-  <br />
-  <label>
-    Liked:
-    <button type="button" onClick={() => handleLikedChange(true)}>
-      👍
-    </button>
-    <button type="button" onClick={() => handleLikedChange(false)}>
-      👎
-    </button>
-  </label>
-  <br />
-  <button type="submit">Submit</button>
-</form> )}
-
-type CourseData = {
-  code: string;
-  title: string;
-  description?: string;
-  prerequesites: string;
-  is_ib_course: boolean;
-  elective: boolean;
+  return (
+    <Form
+      form={form}
+      onFinish={onFinish}
+      initialValues={formValues}
+      labelCol={{ span: 8 }}
+      wrapperCol={{ span: 16 }}
+      style={{ maxWidth: 600 }}
+    >
+      {/* Remove course_code field from the form */}
+      <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
+      <Form.Item name="content" label="Content" rules={[{ required: true }]}>
+        <Input.TextArea />
+      </Form.Item>
+      <Form.Item
+        name="difficulty"
+        label="Difficulty"
+        rules={[{ required: true }]}
+      >
+        <InputNumber min={1} max={5} />
+      </Form.Item>
+      <Form.Item label="Interesting" wrapperCol={{ span: 16, offset: 8 }}>
+        {[1, 2, 3, 4, 5].map((value) => (
+          <span
+            key={value}
+            onClick={() => handleRatingChange(value)}
+            style={{ cursor: "pointer" }}
+          >
+            ⭐
+          </span>
+        ))}
+      </Form.Item>
+      <Form.Item label="Liked" wrapperCol={{ span: 16, offset: 8 }}>
+        <Button type="default" onClick={() => handleLikedChange(true)}>
+          👍
+        </Button>
+        <Button type="default" onClick={() => handleLikedChange(false)}>
+          👎
+        </Button>
+      </Form.Item>
+      <Form.Item wrapperCol={{ ...{ span: 16, offset: 8 } }}>
+        <Button type="primary" htmlType="submit">
+          Submit
+        </Button>
+      </Form.Item>
+    </Form>
+  );
 };
 
-export function CoursePage() { 
-  const { courseID } = useParams();
-  const [courseData, setCourseData] = useState<CourseData>();
-  useEffect(() => {
-    // when component mounts, check if courseCode exists
-    (async function () {
-      try {
-        const response = await axios.get(`${API_URL}/course/${courseID}`);
-        setCourseData(response.data);
-      } catch (error) {
-        setCourseData(undefined);
-      }
-    })();
-  }, [setCourseData]);
-  if (!courseData) {
-    return <p>error</p>; //TODO: add error page
-  }
-
-  else{
-    return<CustomForm></CustomForm>;
-}}
+export default CustomForm;
