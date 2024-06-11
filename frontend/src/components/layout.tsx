@@ -1,5 +1,5 @@
-import { FC, ReactNode, useEffect, useMemo, useState } from "react";
-import { Button, Layout, Menu, theme, Image, Input, Drawer } from "antd";
+import { FC, ReactNode, useEffect, useMemo, useState } from "react"
+import { Button, Layout, Menu, theme, Image, Input, Drawer } from "antd"
 import {
   googleAuthProvider,
   signIn,
@@ -7,42 +7,33 @@ import {
   signOut,
   deleteUser,
   authenticatedApiRequest,
-} from "../lib/firebase";
-import { LeftOutlined } from "@ant-design/icons";
-import {
-  RouterProvider,
-  useLocation,
-  type createBrowserRouter,
-} from "react-router-dom";
-import ConfirmModal from "./confirm-modal";
+  useHandleRedirectResult,
+} from "../lib/firebase"
+import { LeftOutlined } from "@ant-design/icons"
+import { RouterProvider, useLocation, type createBrowserRouter } from "react-router-dom"
+import ConfirmModal from "./confirm-modal"
 
-const { Header, Content, Footer } = Layout;
+const { Header, Content, Footer } = Layout
 
-type Router = ReturnType<typeof createBrowserRouter>;
+type Router = ReturnType<typeof createBrowserRouter>
 
-export const PageLayout = ({
-  children,
-  router,
-}: {
-  children: ReactNode;
-  router: Router;
-}) => {
-  const currentUser = useCurrentUser();
+export const PageLayout = ({ children, router }: { children: ReactNode; router: Router }) => {
+  useHandleRedirectResult()
+  const currentUser = useCurrentUser()
   const {
     token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-  const onSearch = (value: string, _e: any) =>
-    window.location.replace(`/course/${value}`);
-  console.log(window.location.pathname);
-  const { Search } = Input;
+  } = theme.useToken()
+  const onSearch = (value: string, _e: any) => window.location.replace(`/course/${value}`)
+  console.log(window.location.pathname)
+  const { Search } = Input
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
   const showDrawer = () => {
-    setOpen(true);
-  };
+    setOpen(true)
+  }
   const onClose = () => {
-    setOpen(false);
-  };
+    setOpen(false)
+  }
 
   return (
     <Layout>
@@ -77,10 +68,7 @@ export const PageLayout = ({
               flexDirection: "row",
             }}
           >
-            <LeftOutlined
-              style={{ color: "white", fontSize: "24px" }}
-              onClick={showDrawer}
-            />
+            <LeftOutlined style={{ color: "white", fontSize: "24px" }} onClick={showDrawer} />
             <Drawer placement="right" onClose={onClose} open={open}>
               <Menu theme="light" mode="inline">
                 <Menu.Item
@@ -91,14 +79,8 @@ export const PageLayout = ({
                   Profile
                 </Menu.Item>
               </Menu>
-              <div
-                style={{ position: "absolute", bottom: "24px", width: "87%" }}
-              >
-                <Menu
-                  theme="light"
-                  mode="inline"
-                  style={{ textAlign: "center" }}
-                >
+              <div style={{ position: "absolute", bottom: "24px", width: "87%" }}>
+                <Menu theme="light" mode="inline" style={{ textAlign: "center" }}>
                   <Menu.Item
                     style={{ fontWeight: "bold", fontSize: "20px" }}
                     key="sign-out"
@@ -116,9 +98,9 @@ export const PageLayout = ({
                           currentUser.email +
                           ", all data, including your course reviews, will be deleted as well. \n \n This action cannot be undone.",
                         () => {
-                          authenticatedApiRequest("DELETE", "/user/delete");
-                          deleteUser();
-                        },
+                          authenticatedApiRequest("DELETE", "/user/delete")
+                          deleteUser()
+                        }
                       )
                     }
                   >
@@ -151,5 +133,5 @@ export const PageLayout = ({
         CB Path ©{new Date().getFullYear()}
       </Footer>
     </Layout>
-  );
-};
+  )
+}
