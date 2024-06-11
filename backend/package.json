@@ -7,7 +7,7 @@
     "start": "ts-node-dev src/server.ts",
     "build": "tsc",
     "start:production": "node dist/server.js",
-    "prepare": "husky"
+    "postinstall": "cd .. && husky backend/.husky"
   },
   "dependencies": {
     "cors": "^2.8.5",
