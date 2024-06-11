@@ -9,17 +9,30 @@ import { CourseForm, CourseTable } from './components/course-components';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { PageLayout } from './components/layout';
 import { Profile } from './Profile';
+import { Input } from 'antd';
+import { useNavigate } from "react-router-dom";
+import CoursePage from './CoursePage';
 
 /* === REPLACE ME === */
-
+const { Search } = Input;
 const SignInPage = () => <div><p>SignIn page!</p><GoogleLoginButton onClick={() => signIn(googleAuthProvider)} /></div>
-const HomePage = () => (<div>
-  <img src={logo} className="App-logo" alt="logo" />
-  <p>Home page!</p>
-  <a href="/profile">Go to profile page</a>
-</div>)
+function HomePage(){
+  const navigate = useNavigate()
+  const onSearch = (value: string, _e: any,) => navigate(`/course/${value}`);
+  return(<div>
+    <img src={logo} className="App-logo" alt="logo" />
+    <p>Home page!</p>
+    <Search
+        placeholder="Course Code"
+        allowClear
+        enterButton="Search"
+        size="large"
+        onSearch={onSearch}
+      />
+    <a href="/profile">Go to profile page</a>
+  </div>)
+} 
 /* === REPLACE ME === */
-
 const router = createBrowserRouter([
   {
     path: "/profile",
@@ -33,6 +46,10 @@ const router = createBrowserRouter([
     path: '/',
     element: <HomePage />,
   },
+  {
+    path: '/course/:courseID',
+    element:<CoursePage/>,
+  }
 ]);
 
 

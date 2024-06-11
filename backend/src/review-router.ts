@@ -12,7 +12,7 @@ reviewRouter.get('/', async (req, res) => {
 // create a new review
 reviewRouter.post('/', requireAuth, async (req, res) => {
     const {uid} = req.token!;
-    const {title, content, course } = req.body!;
+    const {title, content, course, difficulty, interesting, liked, lastUpdated  } = req.body!;
     const loggedInUser = await prisma.user.findUnique({ where: { firebase_uid: req.token!.uid } })
  
 if(!title || !content){
@@ -22,7 +22,8 @@ if(!title || !content){
     data: {
         title,
         content,user:{connect:{id:loggedInUser.id}},
-        course:{connect:{code:course}}
+        course:{connect:{code:course}}, 
+        difficulty, interesting, liked, lastUpdated
     }
  })
  res.json(newReview);

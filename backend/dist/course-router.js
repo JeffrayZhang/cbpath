@@ -50,4 +50,13 @@ exports.courseRouter.patch('/:courseCode/enroll', middleware_1.requireAuth, asyn
     });
     res.status(200).send('success');
 });
+exports.courseRouter.get('/:courseCode', async (req, res) => {
+    const code = req.params["courseCode"];
+    const Course = await db_1.prisma.course.findUnique({
+        where: {
+            code: code
+        },
+    });
+    res.status(200).json(Course);
+});
 //# sourceMappingURL=course-router.js.map

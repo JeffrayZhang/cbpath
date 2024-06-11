@@ -49,3 +49,14 @@ courseRouter.patch('/:courseCode/enroll', requireAuth, async (req, res) => {
     })
     res.status(200).send('success')
 })
+
+courseRouter.get('/:courseCode', async (req, res) =>{
+    const code = req.params["courseCode"];
+    const Course = await prisma.course.findUnique({
+        where:{
+            code: code
+        },
+    })
+    res.status(200).json(Course)
+})
+
